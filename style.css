@@ -40,3 +40,40 @@ body, html {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     z-index: 2;
 }
+
+.clock {
+    position: absolute;
+    color: #ffffff;
+    font-size: 40px;
+    font-family: Arial, sans-serif;
+}
+
+.top-left {
+    top: 20px;
+    left: 20px;
+}
+
+.top-right {
+    top: 20px;
+    right: 20px;
+}
+
+.bottom-left {
+    bottom: 20px;
+    left: 20px;
+}
+
+.bottom-right {
+    bottom: 20px;
+    right: 20px;
+}
+
+.center {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.free {
+    cursor: move;
+}
