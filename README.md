@@ -1,6 +1,17 @@
-TO DO list:
-1- try "IndexedDB" for lagger background or put a limit 5MB
-2- fix the time does not changing its position after free dragged 
-3- change the background color & style for the settings popup
-5- add a reset to defaults button
-4- add an options page
+# URTab: A Customizable New Tab Page for Brave Browser
+
+URTab is a Brave browser extension that enhances the new tab experience with customizable animated backgrounds, a live clock, and user-friendly settings.
+
+## Features
+
+- Animated backgrounds (images, GIFs, videos)
+- Customizable time display
+- Easy access settings popup
+
+## TODO List
+
+- [ ] Try **IndexedDB** for larger background storage or set a limit of 5MB.
+- [ ] Fix the issue where the time does not change position after being freely dragged.
+- [ ] Change the background color and style for the settings popup.
+- [ ] Add a **Reset to Defaults** button to restore original settings.
+- [ ] Implement an **Options Page** for additional customization.
