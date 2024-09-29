@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", function() {
+	
     const backgroundElement = document.getElementById('background');
     const settingsIcon = document.getElementById('settingsIcon');
     const settingsPopup = document.getElementById('settingsPopup');
@@ -33,26 +34,35 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Handle background selection
     backgroundInput.addEventListener("change", function(event) {
-        if (event.target.files.length > 0) {
-            const file = event.target.files[0];
-            const reader = new FileReader();
+		
+		// limit size to 5MB
+		const file = event.target.files[0];
+        if (file.size > 5 * 1024 * 1024) {
+           alert("Background file must be under 5MB.");
+           return;
+        }
+		else if (file.size < 5 * 1024 * 1024) {
+          if (event.target.files.length > 0) {
+             const file = event.target.files[0];
+             const reader = new FileReader();
 
-            reader.onload = function(e) {
-                const backgroundData = e.target.result;
-                applyBackground(backgroundData);
+             reader.onload = function(e) {
+                 const backgroundData = e.target.result;
+                 applyBackground(backgroundData);
 
                 // Save the selected background in local storage
-                chrome.storage.local.set({ background: backgroundData }, function() {
-                    if (chrome.runtime.lastError) {
-                        console.error("Error saving background:", chrome.runtime.lastError);
-                    } else {
-                        console.log("Background saved.");
-                    }
-                });
+                 chrome.storage.local.set({ background: backgroundData }, function() {
+                     if (chrome.runtime.lastError) {
+                         console.error("Error saving background:", chrome.runtime.lastError);
+                     } else {
+                         console.log("Background saved.");
+                     }
+                 });
             };
 
             reader.readAsDataURL(file);
-        }
+         }
+		}
     });
 
     // Function to apply background
@@ -170,4 +180,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Update clock initially
     updateClock();
+	
+});
+
+document.getElementById('resetButton').addEventListener('click', function() {
+    chrome.storage.local.clear(); // Clear Chrome local storage
+    localStorage.clear(); // Clear other local storage
+    location.reload(); // Reload to apply defaults
 });

@@ -30,15 +30,31 @@ body, html {
     opacity: 1;
 }
 
-.popup {
+#settingsPopup {
     display: none;
     position: fixed;
-    bottom: 80px;
+    bottom: 100px;
     right: 20px;
-    background-color: white;
-    padding: 10px;
+    background: rgba(0, 0, 0, 0.5); /* Dark transparent background */
+    color: white; /* White text */
+    padding: 20px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    border-radius: 10px; /* Rounded corners */
     z-index: 2;
+}
+
+#resetButton {
+    background-color: #f44336; /* Red color */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin-top: 20px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#resetButton:hover {
+    background-color: #d32f2f; /* Darker red on hover */
 }
 
 .clock {
