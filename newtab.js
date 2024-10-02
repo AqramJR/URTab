@@ -77,24 +77,31 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // Clock settings
-    function updateClock() {
-        const now = new Date();
-        let hours = now.getHours();
-        let minutes = now.getMinutes();
-        let seconds = now.getSeconds();
-        const is12Hour = timeFormatInput.value === "12";
+// Clock settings
+function updateClock() {
+    const now = new Date();
+    let hours = now.getHours();
+    let minutes = now.getMinutes();
+    let seconds = now.getSeconds();
+    const is12Hour = timeFormatInput.value === "12";
 
-        if (is12Hour) {
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12 || 12;
-            clockElement.textContent = showSecondsInput.checked ? `${hours}:${minutes}:${seconds} ${ampm}` : `${hours}:${minutes} ${ampm}`;
-        } else {
-            clockElement.textContent = showSecondsInput.checked ? `${hours}:${minutes}:${seconds}` : `${hours}:${minutes}`;
-        }
-
-        setTimeout(updateClock, 1000);
+    // Format the time correctly
+    if (is12Hour) {
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
+        // Add leading zeros for single-digit minutes and seconds
+        clockElement.textContent = showSecondsInput.checked 
+            ? `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')} ${ampm}`
+            : `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} ${ampm}`;
+    } else {
+        // Add leading zeros for single-digit hours, minutes, and seconds
+        clockElement.textContent = showSecondsInput.checked 
+            ? `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+            : `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
     }
+
+    setTimeout(updateClock, 1000);
+}
 
     function applyClockSettings(settings) {
         timeFormatInput.value = settings.format || "12";

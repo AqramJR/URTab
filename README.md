@@ -13,6 +13,7 @@ URTab is a Brave browser extension that enhances the new tab experience with cus
 - ~~Try **IndexedDB** for larger background storage or set a limit of 5MB.~~
 - ~~Change the background color and style for the settings popup.~~
 - ~~Add a **Reset to Defaults** button to restore original settings.~~
+- ~~Fix (12 hr) formation.~~
 - [ ] Fix the issue where the time does not change position after being freely dragged.
 - [ ] Implement an **Options Page** for additional customization.
-- [ ] Fix (12 hr) formation.
+
