@@ -16,6 +16,7 @@ URTab is a Brave browser extension that enhances the new tab experience with cus
 - ~~Add a **Reset to Defaults** button to restore original settings.~~
 - ~~Fix (12 hr) formation.~~
 - ~~Fix the issue where the time does not change position after being freely dragged.~~
+- [ ] Add an option to show/hide the clock
 - [ ] Add a day to the date
 - [ ] Add some fonts, formats, positions
 - [ ] Clean up the settings popup
