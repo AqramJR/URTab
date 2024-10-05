@@ -64,6 +64,13 @@ body, html {
     font-family: Arial, sans-serif;
 }
 
+.date {
+    position: absolute;
+    color: #ffffff;
+    font-size: 40px;
+    font-family: Arial, sans-serif;
+}
+
 .top-left {
     top: 20px;
     left: 20px;
@@ -75,12 +82,12 @@ body, html {
 }
 
 .bottom-left {
-    bottom: 20px;
+    bottom: 70px;
     left: 20px;
 }
 
 .bottom-right {
-    bottom: 20px;
+    bottom: 70px;
     right: 20px;
 }
 
@@ -93,3 +100,30 @@ body, html {
 .free {
     cursor: move;
 }
+
+.d-top-left {
+    top: 70px;
+    left: 20px;
+}
+
+.d-top-right {
+    top: 70px;
+    right: 20px;
+}
+
+.d-bottom-left {
+    bottom: 20px;
+    left: 20px;
+}
+
+.d-bottom-right {
+    bottom: 20px;
+    right: 20px;
+}
+
+.d-center {
+    top: 55%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
