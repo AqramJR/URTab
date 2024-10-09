@@ -1,19 +1,36 @@
 document.addEventListener("DOMContentLoaded", function() {
 	
     const backgroundElement = document.getElementById('background');
+    const muteBackgroundInput = document.getElementById('muteBackground');
+    const backgroundToggle = document.getElementById('backgroundToggle');
     const settingsIcon = document.getElementById('settingsIcon');
     const settingsPopup = document.getElementById('settingsPopup');
     const backgroundInput = document.getElementById('backgroundInput');
 	// Clock
+	const showClockInput = document.getElementById('showClock');
+    const clockSettingsGroup = document.getElementById('clockSettings');
+    const clockToggle = document.getElementById('clockToggle');
+	const clockHeader = document.getElementById('clockHeader');
     const clockElement = document.getElementById('clock');
     const timeFormatInput = document.getElementById('timeFormat');
     const fontTypeInput = document.getElementById('fontType');
     const fontColorInput = document.getElementById('fontColor');
-    const fontSizeInput = document.getElementById('fontSize');
+    const ClockFontSizeInput = document.getElementById('ClockFontSize');
     const clockPositionInput = document.getElementById('clockPosition');
     const showSecondsInput = document.getElementById('showSeconds');
+	// Day
+    const dayElement = document.getElementById('day');
+    const showDayInput = document.getElementById('showDay');
+    const dayStyleInput = document.getElementById('dayStyle');
+    const dayFontTypeInput = document.getElementById('dayFontType');
+    const dayFontColorInput = document.getElementById('dayFontColor');
+    const dayFontSizeInput = document.getElementById('dayFontSize');
+    const dayPositionInput = document.getElementById('dayPosition');
     // Date
     const dateElement = document.getElementById('date');
+	const dateSettingsGroup = document.getElementById('dateSettings');
+    const dateToggle = document.getElementById('dateToggle');
+    const dateHeader = document.getElementById('dateHeader');
     const dateFormatInput = document.getElementById('dateFormat');
     const dateFontTypeInput = document.getElementById('dateFontType');
     const dateFontColorInput = document.getElementById('dateFontColor');
@@ -22,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const showDateInput = document.getElementById('showDate');
 
     // Load saved background from storage
-    chrome.storage.local.get(["background", "clockSettings", "dateSettings"], function(data) {
+    chrome.storage.local.get(["background", "clockSettings", "dateSettings", "daySettings", "muteBackground"], function(data) {
         if (data.background) {
             applyBackground(data.background);
         } else {
@@ -33,11 +50,24 @@ document.addEventListener("DOMContentLoaded", function() {
         // Load clock settings
         if (data.clockSettings) {
             applyClockSettings(data.clockSettings);
+			showClockInput.checked = data.clockSettings.showClock !== undefined ? data.clockSettings.showClock : true;
+            clockElement.style.display = showClockInput.checked ? 'block' : 'none';
         }
 		
 		// Load date settings
 		if (data.dateSettings) {
             applyDateSettings(data.dateSettings);
+        }
+		// Load day settings
+        if (data.daySettings) {
+            applyDaySettings(data.daySettings);
+        }
+		// Load mute/unmute settings
+        if (data.muteBackground !== undefined) {
+            muteBackgroundInput.checked = data.muteBackground;
+            toggleBackgroundSound(data.muteBackground);
+        } else {
+            muteBackgroundInput.checked = false; // Default is unmuted
         }
     });
 
@@ -79,10 +109,30 @@ document.addEventListener("DOMContentLoaded", function() {
 		}
     });
 
+    // Mute/Unmute background sound based on user input
+    muteBackgroundInput.addEventListener("change", function() {
+        const isMuted = muteBackgroundInput.checked;
+        toggleBackgroundSound(isMuted);
+
+        // Save mute setting in Chrome storage
+        chrome.storage.local.set({ muteBackground: isMuted }, function() {
+            console.log("Mute background sound setting saved:", isMuted);
+        });
+    });
+
+    // Function to mute/unmute background video sound
+    function toggleBackgroundSound(mute) {
+        const videoElement = backgroundElement.querySelector("video");
+
+        if (videoElement) {
+            videoElement.muted = mute;
+        }
+    }
+	
     // Function to apply background
     function applyBackground(data) {
         if (data.startsWith("data:video")) {
-            backgroundElement.innerHTML = `<video autoplay loop muted style="width: 100%; height: 100%; object-fit: cover;">
+            backgroundElement.innerHTML = `<video autoplay loop ${muteBackgroundInput.checked ? "muted" : ""} style="width: 100%; height: 100%; object-fit: cover;">
                                                 <source src="${data}" type="video/mp4">
                                             </video>`;
         } else {
@@ -90,17 +140,76 @@ document.addEventListener("DOMContentLoaded", function() {
             backgroundElement.innerHTML = ""; // Clear any existing video
         }
     }
+	
 
+	
+    backgroundHeader.addEventListener("click", () => {
+        backgroundSettings.style.display = backgroundSettings.style.display === "block" ? "none" : "block";
+        backgroundToggle.classList.toggle("rotated"); // Add or remove 'rotated' class to rotate arrow
+    });
 
-    fontColorInput.addEventListener('input', function() {
+    dateHeader.addEventListener("click", () => {
+    dateSettings.style.display = dateSettings.style.display === "block" ? "none" : "block";
+    dateToggle.classList.toggle("rotated"); // Add or remove 'rotated' class to rotate arrow
+    });
+
+	dayHeader.addEventListener("click", () => {
+    daySettings.style.display = daySettings.style.display === "block" ? "none" : "block";
+    dayToggle.classList.toggle("rotated"); // Add or remove 'rotated' class to rotate arrow
+    });
+
+    clockHeader.addEventListener("click", () => {
+        clockSettings.style.display = clockSettings.style.display === "block" ? "none" : "block";
+        clockToggle.classList.toggle("rotated"); // Add or remove 'rotated' class to rotate arrow
+    });
+	
+
+    // Initial state: Show or hide clock settings based on saved state
+    chrome.storage.local.get(["clockSettings", "dateSettings", "daySettings"], function(data) {
+        if (data.clockSettings && !data.clockSettings.showClock) {
+            clockSettingsGroup.style.display = 'none';
+            clockElement.style.display = 'none';
+            showClockInput.checked = false;
+        }
+        if (data.dateSettings && !data.dateSettings.showDate) {
+            dateSettingsGroup.style.display = 'none';
+            dateElement.style.display = 'none';
+            showDateInput.checked = false;
+        }
+        if (data.daySettings && !data.daySettings.showDay) {
+            daySettings.style.display = 'none';
+            dayElement.style.display = 'none';
+            showDayInput.checked = false;
+        }
+    });
+
+    fontColorInput.addEventListener('input', function () {
         clockElement.style.color = fontColorInput.value;
-  
+
         // Save the clock color to chrome storage immediately
-        chrome.storage.local.set({ clockColor: fontColorInput.value }, function() {
+        chrome.storage.local.set({ clockColor: fontColorInput.value }, function () {
             console.log("Clock color saved:", fontColorInput.value);
         });
     });
+	
+    showClockInput.addEventListener("change", function() {
+        clockElement.style.display = showClockInput.checked ? 'block' : 'none';
 
+        // Save the clock visibility in chrome storage
+        const clockSettings = {
+            showClock: showClockInput.checked,
+            // Keep existing settings
+            format: timeFormatInput.value,
+            fontType: fontTypeInput.value,
+            color: fontColorInput.value,
+            size: ClockFontSizeInput.value,
+            position: clockPositionInput.value,
+            showSeconds: showSecondsInput.checked
+        };
+        chrome.storage.local.set({ clockSettings: clockSettings }, function() {
+            console.log("Clock settings updated.");
+        });
+    });
 
     // Clock settings
     function updateClock() {
@@ -129,16 +238,19 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function applyClockSettings(settings) {
+		showClockInput.checked = settings.showClock !== undefined ? settings.showClock : true;
+        clockElement.style.display = showClockInput.checked ? 'block' : 'none';
+	
         timeFormatInput.value = settings.format || "12";
         fontTypeInput.value = settings.fontType || "Arial";
         fontColorInput.value = settings.color || "#ffffff";
-        fontSizeInput.value = settings.size || "40";
+        ClockFontSizeInput.value = settings.size || "40";
         clockPositionInput.value = settings.position || "center";
         showSecondsInput.checked = settings.showSeconds;
 
         clockElement.style.fontFamily = fontTypeInput.value;
         clockElement.style.color = fontColorInput.value;
-        clockElement.style.fontSize = `${fontSizeInput.value}px`;
+        clockElement.style.fontSize = `${ClockFontSizeInput.value}px`;
         updateClockPosition(clockPositionInput.value);
     }
 
@@ -167,7 +279,18 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-	
+    function updateClockFontSizeLabel() {
+        const fontSizeSlider = document.getElementById('ClockFontSize');
+        const ClockfontSizeLabel = document.getElementById('ClockfontSizeLabel');
+
+        ClockfontSizeLabel.textContent = fontSizeSlider.value; // Update the label with the slider's value
+        clockElement.style.fontSize = `${fontSizeSlider.value}px`; // Apply the font size to the Clock element
+    }
+    // Event listener for when the slider is used
+    document.getElementById('ClockFontSize').addEventListener('input', updateClockFontSizeLabel);
+
+    // Initial call to set the font size based on the default slider value
+    updateClockFontSizeLabel();
 	
     function makeElementDraggable(element) {
         let offsetX, offsetY, isDragging = false;
@@ -215,13 +338,13 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
         // Save clock settings on change
-        [timeFormatInput, fontTypeInput, fontColorInput, fontSizeInput, clockPositionInput, showSecondsInput].forEach(input => {
+    [timeFormatInput, fontTypeInput, fontColorInput, ClockFontSizeInput, clockPositionInput, showSecondsInput].forEach(input => {
             input.addEventListener("change", function() {
                 const clockSettings = {
                     format: timeFormatInput.value,
                     fontType: fontTypeInput.value,
                     color: fontColorInput.value,
-                    size: fontSizeInput.value,
+                    size: ClockFontSizeInput.value,
                     position: clockPositionInput.value,
                     showSeconds: showSecondsInput.checked,
                     top: clockElement.style.top,
@@ -236,9 +359,141 @@ document.addEventListener("DOMContentLoaded", function() {
 
         // Update clock initially
         updateClock();
-	
-    
+		
+		
+    //-------------------------->DAY<-------------------------//
+    // Update the day display
+    function updateDay() {
+        const now = new Date();
+        const dayStyle = dayStyleInput.value; // This should reference your dayStyle select element
+        let dayString = '';
 
+        switch (dayStyle) {
+            case 'Full':
+                dayString = now.toLocaleString('default', { weekday: 'long' }).toUpperCase();
+                break;
+            case 'Short':
+                dayString = now.toLocaleString('default', { weekday: 'short' }).toUpperCase();
+                break;
+        }
+
+        // Insert a space between each letter
+        dayString = dayString.split('').join(' ');
+
+        // Update the day element with the formatted day string
+        dayElement.textContent = dayString;
+    }
+
+    // Apply the day settings
+    function applyDaySettings(settings) {
+        dayStyleInput.value = settings.style || "Full"; // Ensure dayStyleInput is defined
+        dayFontTypeInput.value = settings.fontType || "Arial";
+        dayFontColorInput.value = settings.color || "#ffffff";
+        dayFontSizeInput.value = settings.size || "20";
+        dayPositionInput.value = settings.position || "day-top-right";
+        showDayInput.checked = settings.showDay !== undefined ? settings.showDay : true;
+
+        dayElement.style.fontFamily = dayFontTypeInput.value;
+        dayElement.style.color = dayFontColorInput.value;
+        dayElement.style.fontSize = `${dayFontSizeInput.value}px`;
+        updateDayPosition(dayPositionInput.value);
+
+        // Show or hide day
+        dayElement.style.display = showDayInput.checked ? 'block' : 'none';
+
+        // Update the day immediately
+        updateDay();
+    }
+
+    // Update day position
+    function updateDayPosition(position) {
+        dayElement.classList.remove("day-top-left", "day-top-right", "day-bottom-left", "day-bottom-right", "day-center", "free");
+        dayElement.classList.add(position);
+
+        if (position === "free") {
+            makeElementDraggable(dayElement);
+        } else {
+            dayElement.style.position = 'absolute'; // Ensure position is absolute for other positions
+            dayElement.style.left = '';
+            dayElement.style.top = '';
+        }
+    }
+    function updatedayFontSizeLabel() {
+        const fontSizeSlider = document.getElementById('dayFontSize');
+        const dayfontSizeLabel = document.getElementById('dayfontSizeLabel');
+
+        dayfontSizeLabel.textContent = fontSizeSlider.value; // Update the label with the slider's value
+        dayElement.style.fontSize = `${fontSizeSlider.value}px`; // Apply the font size to the day element
+    }
+    // Event listener for when the slider is used
+    document.getElementById('dayFontSize').addEventListener('input', updatedayFontSizeLabel);
+
+    // Initial call to set the font size based on the default slider value
+    updatedayFontSizeLabel();
+
+
+    // Save day settings
+    [dayStyleInput, dayFontTypeInput, dayFontColorInput, dayFontSizeInput, dayPositionInput, showDayInput].forEach(input => {
+        input.addEventListener("change", function () {
+            const daySettings = {
+                style: dayStyleInput.value,
+                fontType: dayFontTypeInput.value,
+                color: dayFontColorInput.value,
+                size: dayFontSizeInput.value,
+                position: dayPositionInput.value,
+                showDay: showDayInput.checked
+            };
+            chrome.storage.local.set({ daySettings: daySettings }, function () {
+                console.log("Day settings saved.");
+            });
+            applyDaySettings(daySettings);
+        });
+    });
+
+    // Update day initially
+    updateDay();
+
+    // Update day text color live if the color is changed
+    dayFontColorInput.addEventListener('input', function () {
+        dayElement.style.color = dayFontColorInput.value;
+    });
+
+    // Save last drag position for the day
+    function makeElementDraggable(element) {
+        let offsetX, offsetY, isDragging = false;
+
+        element.addEventListener("mousedown", function (e) {
+            isDragging = true;
+            offsetX = e.clientX - element.getBoundingClientRect().left;
+            offsetY = e.clientY - element.getBoundingClientRect().top;
+            element.style.position = 'absolute';
+        });
+
+        document.addEventListener("mousemove", function (e) {
+            if (isDragging) {
+                element.style.left = (e.clientX - offsetX) + "px";
+                element.style.top = (e.clientY - offsetY) + "px";
+            }
+        });
+
+        document.addEventListener("mouseup", function () {
+            if (isDragging) {
+                isDragging = false;
+
+                // Save the last drag position in chrome storage
+                const position = {
+                    left: element.style.left,
+                    top: element.style.top
+                };
+                chrome.storage.local.set({ dayPosition: position }, function () {
+                    console.log("Day position saved:", position);
+                });
+            }
+        });
+    }
+
+
+//---------------->DATE<-----------------//
 
     // Update the date display
     function updateDate() {
@@ -294,6 +549,18 @@ document.addEventListener("DOMContentLoaded", function() {
             dateElement.style.top = '';
         }
     }
+    function updatedateFontSizeLabel() {
+        const fontSizeSlider = document.getElementById('dateFontSize');
+        const datefontSizeLabel = document.getElementById('datefontSizeLabel');
+
+        datefontSizeLabel.textContent = fontSizeSlider.value; // Update the label with the slider's value
+        dateElement.style.fontSize = `${fontSizeSlider.value}px`; // Apply the font size to the date element
+    }
+    // Event listener for when the slider is used
+    document.getElementById('dateFontSize').addEventListener('input', updatedateFontSizeLabel);
+
+    // Initial call to set the font size based on the default slider value
+    updatedateFontSizeLabel();
 
     // Save date settings
     [dateFormatInput, dateFontTypeInput, dateFontColorInput, dateFontSizeInput, datePositionInput, showDateInput].forEach(input => {

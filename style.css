@@ -16,6 +16,7 @@ body, html {
 }
 
 #settingsIcon {
+    display: inline-block;
     position: fixed;
     bottom: 20px;
     right: 20px;
@@ -24,10 +25,12 @@ body, html {
     cursor: pointer;
     opacity: 0.3;
     transition: opacity 0.3s;
+    transition: transform 0.3s ease; 
 }
 
 #settingsIcon:hover {
     opacity: 1;
+    animation: rotate 2s linear infinite; /* Rotate continuously at a specified duration */
 }
 
 #settingsPopup {
@@ -122,8 +125,135 @@ body, html {
 }
 
 .d-center {
-    top: 55%;
+    top: 56%;
     left: 50%;
     transform: translate(-50%, -50%);
 }
+.day-top-left {
+    top: 70px;
+    left: 20px;
+}
 
+.day-top-right {
+    top: 70px;
+    right: 20px;
+}
+
+.day-bottom-left {
+    bottom: 20px;
+    left: 20px;
+}
+
+.day-bottom-right {
+    bottom: 20px;
+    right: 20px;
+}
+
+.day-center {
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.settings-section {
+    margin-bottom: 20px;
+}
+
+.settings-header {
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+    padding: 10px;
+    background-color: #333;
+    color: white;
+    border-radius: 5px;
+	font-weight: bold;
+}
+
+.settings-header span {
+    display: inline-block;
+}
+
+.arrow {
+    font-size: 16px;
+}
+
+.settings-group {
+    padding: 10px;
+    display: none; /* Start hidden */
+}
+
+#clockSettings, #dateSettings #daySettings {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+/* Arrow for the collapsible sections */
+.settings-header span#clockToggle,
+.settings-header span#dayToggle, 
+.settings-header span#dateToggle {
+    transition: transform 3s ease; /* Smooth animation */
+}
+
+.settings-header span.rotated {
+    transform: rotate(180deg); /* Rotate the arrow */
+}
+
+@font-face {
+    font-family: 'Anurati';
+    src: url('/assist/fonts/Anurati-Regular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Aquatico';
+    src: url('/assist/fonts/Aquatico.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Quicksand';
+    src: url('/assist/fonts/Quicksand.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Jartely';
+    src: url('/assist/fonts/Jartely.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Creattion';
+    src: url('/assist/fonts/Creattion Demo.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'SCRIPTIN';
+    src: url('/assist/fonts/SCRIPTIN.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'GreatVibes';
+    src: url('/assist/fonts/GreatVibes-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Rockybilly';
+    src: url('/assist/fonts/Rockybilly.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}

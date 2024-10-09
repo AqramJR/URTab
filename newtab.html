@@ -1,95 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="style.css">
     <title>Custom New Tab</title>
 </head>
+
 <body>
     <div id="background"></div>
     <div id="clock" class="clock"></div>
-	<div id="date" class="date"></div>
-
+    <div id="date" class="date"></div>
+    <div id="day" class="day"></div>
+    
     <img id="settingsIcon" src="assets/settingsicon.png" alt="Settings" />
 
     <!-- Popup for settings -->
     <div id="settingsPopup" class="popup">
-        <label for="backgroundInput">Select Background (Image/GIF/Video):</label>
-        <input type="file" id="backgroundInput" accept="image/*,video/*"><br><br>
-        <h3>Clock Settings</h3>
-        <label for="timeFormat">Time Format:</label>
-        <select id="timeFormat">
-            <option value="12">12-hour</option>
-            <option value="24">24-hour</option>
-        </select><br><br>
+        <div id="backgroundHeader" class="settings-header">
+            <span>Background Settings</span>
+            <span id="backgroundToggle">▼</span>
+        </div>
+        <div id="backgroundSettings" class="settings-group">
 
-        <label for="fontType">Font Type:</label>
-        <select id="fontType">
-            <option value="Arial">Arial</option>
-            <option value="Verdana">Verdana</option>
-            <option value="Times New Roman">Times New Roman</option>
-            <option value="Courier New">Courier New</option>
-        </select><br><br>
+            <label for="backgroundInput">Select Background (Image/GIF/Video):</label>
+            <input type="file" id="backgroundInput" accept="image/*,video/*"><br><br>
+            <label for="muteBackground">Mute Background Sound</label>
+            <input type="checkbox" id="muteBackground">
+        </div>
 
-        <label for="fontColor">Font Color:</label>
-        <input type="color" id="fontColor" value="#ffffff"><br><br>
+        <!-- Clock Settings Section -->
+        <div id="clockHeader" class="settings-header">
+            <span>Clock Settings</span>
+            <span id="clockToggle">▼</span>
+        </div>
+        <div id="clockSettings" class="settings-group">
+            <label for="showClock">Show Clock:</label>
+            <input type="checkbox" id="showClock" checked><br><br>
 
-        <label for="fontSize">Font Size:</label>
-        <input type="number" id="fontSize" value="40"><br><br>
+            <label for="timeFormat">Time Format:</label>
+            <select id="timeFormat">
+                <option value="12">12-hour</option>
+                <option value="24">24-hour</option>
+            </select><br><br>
 
-        <label for="clockPosition">Clock Position:</label>
-        <select id="clockPosition">
-            <option value="top-left">Top Left</option>
-            <option value="top-right">Top Right</option>
-            <option value="bottom-left">Bottom Left</option>
-            <option value="bottom-right">Bottom Right</option>
-            <option value="center">Center</option>
-            <option value="free">Free Drag</option>
-        </select><br><br>
+            <label for="fontType">Font Type:</label>
+            <select id="fontType">
+                <option value="Anurati">Anurati</option>
+                <option value="Aquatico">Aquatico</option>
+                <option value="Quicksand">Quicksand</option>
+                <option value="Jartely">Jartely</option>
+                <option value="Creattion">Creattion</option>
+                <option value="SCRIPTIN">SCRIPTIN</option>
+                <option value="GreatVibes">GreatVibes</option>
+                <option value="Rockybilly">Rockybilly</option>
+                <option value="Arial">Arial</option>
+                <option value="Verdana">Verdana</option>
+                <option value="Times New Roman">Times New Roman</option>
+                <option value="Courier New">Courier New</option>
+            </select><br><br>
 
-        <label for="showSeconds">Show Seconds:</label>
-        <input type="checkbox" id="showSeconds" checked><br>
-		
-		 <h3>Date Settings</h3>
-		 
-		<label for="dateFormat">Date Format:</label>
-        <select id="dateFormat">
-		    <option value="DD/MM/YYYY">DD/MM/YYYY</option>
-            <option value="MM/DD/YYYY">MM/DD/YYYY</option>
-            <option value="YYYY-MM-DD">YYYY-MM-DD</option>
-        </select><br><br>
+            <label for="fontColor">Font Color:</label>
+            <input type="color" id="fontColor" value="#ffffff"><br><br>
 
-        <label for="dateFontType">Date Font Type:</label>
-        <select id="dateFontType">
-            <option value="Arial">Arial</option>
-            <option value="Verdana">Verdana</option>
-            <option value="Times New Roman">Times New Roman</option>
-            <option value="Courier New">Courier New</option>
-        </select><br><br>
+            <label for="ClockFontSize">Clock Font Size:</label>
+            <input type="range" id="ClockFontSize" min="30" max="200" value="20" step="5">
+            <span id="ClockfontSizeLabel">20</span>px<br><br>
 
-        <label for="dateFontColor">Date Font Color:</label>
-        <input type="color" id="dateFontColor" value="#ffffff"><br><br>
 
-        <label for="dateFontSize">Date Font Size:</label>
-        <input type="number" id="dateFontSize" value="40"><br><br>
+            <label for="clockPosition">Clock Position:</label>
+            <select id="clockPosition">
+                <option value="top-left">Top Left</option>
+                <option value="top-right">Top Right</option>
+                <option value="bottom-left">Bottom Left</option>
+                <option value="bottom-right">Bottom Right</option>
+                <option value="center">Center</option>
+                <option value="free">Free Drag</option>
+            </select><br><br>
 
-        <label for="datePosition">Date Position:</label>
-        <select id="datePosition">
-            <option value="d-top-left">Top Left</option>
-            <option value="d-top-right">Top Right</option>
-            <option value="d-bottom-left">Bottom Left</option>
-            <option value="d-bottom-right">Bottom Right</option>
-            <option value="d-center">Center</option>
-            <option value="free">Free Drag</option>
-        </select><br><br>
+            <label for="showSeconds">Show Seconds:</label>
+            <input type="checkbox" id="showSeconds" checked><br><br>
+        </div>
+        <!-- Day Settings Section -->
+        <div id="dayHeader" class="settings-header">
+            <span>Day Settings</span>
+            <span id="dayToggle">▼</span>
+        </div>
+        <div id="daySettings" class="settings-group">
+            <label for="showDay">Show Day:</label>
+            <input type="checkbox" id="showDay" checked><br><br>
 
-        <label for="showDate">Show Date:</label>
-        <input type="checkbox" id="showDate" checked><br><br>
-		<button id="resetButton">Reset to Defaults</button>
+            <label for="dayStyle">Day Style:</label>
+            <select id="dayStyle">
+                <option value="Full">Full Day Name</option>
+                <option value="Short">Short Day Name</option>
+            </select><br><br>
 
+            <label for="dayFontType">Day Font Type:</label>
+            <select id="dayFontType">
+                <option value="Anurati">Anurati</option>
+                <option value="Aquatico">Aquatico</option>
+                <option value="Quicksand">Quicksand</option>
+                <option value="Jartely">Jartely</option>
+                <option value="Creattion">Creattion</option>
+                <option value="SCRIPTIN">SCRIPTIN</option>
+                <option value="GreatVibes">GreatVibes</option>
+                <option value="Rockybilly">Rockybilly</option>
+                <option value="Arial">Arial</option>
+                <option value="Verdana">Verdana</option>
+                <option value="Georgia">Georgia</option>
+                <option value="Courier New">Courier New</option>
+            </select><br><br>
+
+            <label for="dayFontColor">Day Font Color:</label>
+            <input type="color" id="dayFontColor" value="#ffffff"><br><br>
+
+            <label for="dayFontSize">Day Font Size:</label>
+            <input type="range" id="dayFontSize" min="30" max="200" value="20" step="5">
+            <span id="dayfontSizeLabel">20</span>px<br><br>
+
+            <label for="dayPosition">Day Position:</label>
+            <select id="dayPosition">
+                <option value="day-top-left">Top Left</option>
+                <option value="day-top-right">Top Right</option>
+                <option value="day-bottom-left">Bottom Left</option>
+                <option value="day-bottom-right">Bottom Right</option>
+                <option value="day-center">Center</option>
+                <option value="free">Free Drag</option>
+            </select><br><br>
+        </div>
+
+        <!-- Date Settings Section -->
+        <div id="dateHeader" class="settings-header">
+            <span>Date Settings</span>
+            <span id="dateToggle">▼</span>
+        </div>
+        <div id="dateSettings" class="settings-group">
+            <label for="showDate">Show Date:</label>
+            <input type="checkbox" id="showDate" checked><br><br>
+
+            <label for="dateFormat">Date Format:</label>
+            <select id="dateFormat">
+                <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+            </select><br><br>
+
+            <label for="dateFontType">Date Font Type:</label>
+            <select id="dateFontType">
+                <option value="Anurati">Anurati</option>
+                <option value="Aquatico">Aquatico</option>
+                <option value="Quicksand">Quicksand</option>
+                <option value="Jartely">Jartely</option>
+                <option value="Creattion">Creattion</option>
+                <option value="SCRIPTIN">SCRIPTIN</option>
+                <option value="GreatVibes">GreatVibes</option>
+                <option value="Rockybilly">Rockybilly</option>
+                <option value="Arial">Arial</option>
+                <option value="Verdana">Verdana</option>
+                <option value="Times New Roman">Times New Roman</option>
+                <option value="Courier New">Courier New</option>
+            </select><br><br>
+
+            <label for="dateFontColor">Date Font Color:</label>
+            <input type="color" id="dateFontColor" value="#ffffff"><br><br>
+
+            <label for="dateFontSize">Date Font Size:</label>
+            <input type="range" id="dateFontSize" min="30" max="200" value="20" step="5">
+            <span id="datefontSizeLabel">20</span>px<br><br>
+
+            <label for="datePosition">Date Position:</label>
+            <select id="datePosition">
+                <option value="d-top-left">Top Left</option>
+                <option value="d-top-right">Top Right</option>
+                <option value="d-bottom-left">Bottom Left</option>
+                <option value="d-bottom-right">Bottom Right</option>
+                <option value="d-center">Center</option>
+                <option value="free">Free Drag</option>
+            </select><br><br>
+        </div>
+        <!-- Reset Button -->
+        <button id="resetButton">Reset to Defaults</button>
     </div>
 
-    <script src="newtab.js"></script>
+        <script src="newtab.js"></script>
 </body>
+
 </html>
