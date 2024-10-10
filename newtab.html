@@ -23,13 +23,25 @@
             <span id="backgroundToggle">▼</span>
         </div>
         <div id="backgroundSettings" class="settings-group">
+            <label for="backgroundSelect">Select Background:</label>
+            <select id="backgroundSelect">
+                <option value="assets/default_background.mp4">Default Background</option>
+                <option value="assets/background1.mp4">Background 1</option>
+                <option value="assets/background2.mp4">Background 2</option>
+                <option value="assets/background3.mp4">Background 3</option>
+                <option value="assets/XP.jpg">Background 4</option>
+                <option value="custom">Custom</option>
+            </select><br><br>
 
-            <label for="backgroundInput">Select Background (Image/GIF/Video):</label>
-            <input type="file" id="backgroundInput" accept="image/*,video/*"><br><br>
+            <label for="backgroundInput" id="customBackgroundLabel" style="display: none;">Select Background (Image/GIF/Video):</label>
+            <input type="file" id="backgroundInput" accept="image/*,video/*" style="display: none;"><br><br>
             <label for="muteBackground">Mute Background Sound</label>
-            <input type="checkbox" id="muteBackground">
-        </div>
+            <input type="checkbox" id="muteBackground"><br><br>
+            <label for="backgroundBlur">Background Blur:</label>
+            <input type="range" id="backgroundBlur" min="0" max="100" value="0"><br><br>
 
+        </div><br>
+        
         <!-- Clock Settings Section -->
         <div id="clockHeader" class="settings-header">
             <span>Clock Settings</span>
@@ -47,26 +59,29 @@
 
             <label for="fontType">Font Type:</label>
             <select id="fontType">
-                <option value="Anurati">Anurati</option>
                 <option value="Aquatico">Aquatico</option>
-                <option value="Quicksand">Quicksand</option>
-                <option value="Jartely">Jartely</option>
-                <option value="Creattion">Creattion</option>
-                <option value="SCRIPTIN">SCRIPTIN</option>
-                <option value="GreatVibes">GreatVibes</option>
-                <option value="Rockybilly">Rockybilly</option>
+                <option value="Anurati">Anurati</option>
                 <option value="Arial">Arial</option>
-                <option value="Verdana">Verdana</option>
-                <option value="Times New Roman">Times New Roman</option>
                 <option value="Courier New">Courier New</option>
+                <option value="Great Vibes">Great Vibes</option>
+                <option value="oneria Script Slanted Demo">oneria Script Slanted Demo</option>
+                <option value="Coneria Script Demo">Coneria Script Demo</option>
+                <option value="Play">Play</option>
+                <option value="Quicksand">Quicksand</option>
+                <option value="Rockybilly">Rockybilly</option>
+                <option value="Scriptina">Scriptina</option>
+                <option value="SeasideResortNF">SeasideResortNF</option>
+                <option value="Times New Roman">Times New Roman</option>
+                <option value="Ubuntu">Ubuntu</option>
+                <option value="Verdana">Verdana</option>
             </select><br><br>
 
             <label for="fontColor">Font Color:</label>
             <input type="color" id="fontColor" value="#ffffff"><br><br>
 
             <label for="ClockFontSize">Clock Font Size:</label>
-            <input type="range" id="ClockFontSize" min="30" max="200" value="20" step="5">
-            <span id="ClockfontSizeLabel">20</span>px<br><br>
+            <input type="range" id="ClockFontSize" min="10" max="200" value="50" step="5">
+            <span id="ClockfontSizeLabel">50</span>px<br><br>
 
 
             <label for="clockPosition">Clock Position:</label>
@@ -81,7 +96,7 @@
 
             <label for="showSeconds">Show Seconds:</label>
             <input type="checkbox" id="showSeconds" checked><br><br>
-        </div>
+        </div><br>
         <!-- Day Settings Section -->
         <div id="dayHeader" class="settings-header">
             <span>Day Settings</span>
@@ -93,32 +108,35 @@
 
             <label for="dayStyle">Day Style:</label>
             <select id="dayStyle">
-                <option value="Full">Full Day Name</option>
-                <option value="Short">Short Day Name</option>
+                <option value="Full">Full</option>
+                <option value="Short">Short</option>
             </select><br><br>
 
             <label for="dayFontType">Day Font Type:</label>
             <select id="dayFontType">
-                <option value="Anurati">Anurati</option>
                 <option value="Aquatico">Aquatico</option>
-                <option value="Quicksand">Quicksand</option>
-                <option value="Jartely">Jartely</option>
-                <option value="Creattion">Creattion</option>
-                <option value="SCRIPTIN">SCRIPTIN</option>
-                <option value="GreatVibes">GreatVibes</option>
-                <option value="Rockybilly">Rockybilly</option>
+                <option value="Anurati">Anurati</option>
                 <option value="Arial">Arial</option>
-                <option value="Verdana">Verdana</option>
-                <option value="Georgia">Georgia</option>
                 <option value="Courier New">Courier New</option>
+                <option value="Great Vibes">Great Vibes</option>
+                <option value="oneria Script Slanted Demo">oneria Script Slanted Demo</option>
+                <option value="Coneria Script Demo">Coneria Script Demo</option>
+                <option value="Play">Play</option>
+                <option value="Quicksand">Quicksand</option>
+                <option value="Rockybilly">Rockybilly</option>
+                <option value="Scriptina">Scriptina</option>
+                <option value="SeasideResortNF">SeasideResortNF</option>
+                <option value="Times New Roman">Times New Roman</option>
+                <option value="Ubuntu">Ubuntu</option>
+                <option value="Verdana">Verdana</option>
             </select><br><br>
 
             <label for="dayFontColor">Day Font Color:</label>
             <input type="color" id="dayFontColor" value="#ffffff"><br><br>
 
             <label for="dayFontSize">Day Font Size:</label>
-            <input type="range" id="dayFontSize" min="30" max="200" value="20" step="5">
-            <span id="dayfontSizeLabel">20</span>px<br><br>
+            <input type="range" id="dayFontSize" min="30" max="200" value="60" step="5">
+            <span id="dayfontSizeLabel">60</span>px<br><br>
 
             <label for="dayPosition">Day Position:</label>
             <select id="dayPosition">
@@ -129,7 +147,7 @@
                 <option value="day-center">Center</option>
                 <option value="free">Free Drag</option>
             </select><br><br>
-        </div>
+        </div><br>
 
         <!-- Date Settings Section -->
         <div id="dateHeader" class="settings-header">
@@ -139,36 +157,52 @@
         <div id="dateSettings" class="settings-group">
             <label for="showDate">Show Date:</label>
             <input type="checkbox" id="showDate" checked><br><br>
+            <label for="showYear">Show Year:</label>
+            <input type="checkbox" id="showYear" checked><br><br>
+
+            <div id="yearFormatContainer">
+                <label for="yearFormat">Year Format:</label>
+                <select id="yearFormat">
+                    <option value="full">Full</option>
+                    <option value="short">Short</option>
+                </select><br><br>
+            </div>
+
 
             <label for="dateFormat">Date Format:</label>
             <select id="dateFormat">
-                <option value="DD/MM/YYYY">DD/MM/YYYY</option>
-                <option value="MM/DD/YYYY">MM/DD/YYYY</option>
-                <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                <option value="DD MMM">09 Sep</option>
+                <option value="DD MMMM">09 September</option>
+                <option value="DD/MM/YYYY">29/09</option>
+                <option value="MM/DD/YYYY">09/29</option>
+                <option value="YYYY-MM-DD">1999-09-29</option>
             </select><br><br>
 
             <label for="dateFontType">Date Font Type:</label>
             <select id="dateFontType">
-                <option value="Anurati">Anurati</option>
                 <option value="Aquatico">Aquatico</option>
-                <option value="Quicksand">Quicksand</option>
-                <option value="Jartely">Jartely</option>
-                <option value="Creattion">Creattion</option>
-                <option value="SCRIPTIN">SCRIPTIN</option>
-                <option value="GreatVibes">GreatVibes</option>
-                <option value="Rockybilly">Rockybilly</option>
+                <option value="Anurati">Anurati</option>
                 <option value="Arial">Arial</option>
-                <option value="Verdana">Verdana</option>
-                <option value="Times New Roman">Times New Roman</option>
                 <option value="Courier New">Courier New</option>
+                <option value="Great Vibes">Great Vibes</option>
+                <option value="oneria Script Slanted Demo">oneria Script Slanted Demo</option>
+                <option value="Coneria Script Demo">Coneria Script Demo</option>
+                <option value="Play">Play</option>
+                <option value="Quicksand">Quicksand</option>
+                <option value="Rockybilly">Rockybilly</option>
+                <option value="Scriptina">Scriptina</option>
+                <option value="SeasideResortNF">SeasideResortNF</option>
+                <option value="Times New Roman">Times New Roman</option>
+                <option value="Ubuntu">Ubuntu</option>
+                <option value="Verdana">Verdana</option>
             </select><br><br>
 
             <label for="dateFontColor">Date Font Color:</label>
             <input type="color" id="dateFontColor" value="#ffffff"><br><br>
 
             <label for="dateFontSize">Date Font Size:</label>
-            <input type="range" id="dateFontSize" min="30" max="200" value="20" step="5">
-            <span id="datefontSizeLabel">20</span>px<br><br>
+            <input type="range" id="dateFontSize" min="30" max="200" value="45" step="5">
+            <span id="datefontSizeLabel">45</span>px<br><br>
 
             <label for="datePosition">Date Position:</label>
             <select id="datePosition">
@@ -179,7 +213,7 @@
                 <option value="d-center">Center</option>
                 <option value="free">Free Drag</option>
             </select><br><br>
-        </div>
+        </div><br>
         <!-- Reset Button -->
         <button id="resetButton">Reset to Defaults</button>
     </div>

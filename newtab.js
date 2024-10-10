@@ -2,7 +2,10 @@ document.addEventListener("DOMContentLoaded", function() {
 	
     const backgroundElement = document.getElementById('background');
     const muteBackgroundInput = document.getElementById('muteBackground');
+    const backgroundSelect = document.getElementById('backgroundSelect');
+    const customBackgroundLabel = document.getElementById('customBackgroundLabel');
     const backgroundToggle = document.getElementById('backgroundToggle');
+    const backgroundBlurInput = document.getElementById('backgroundBlur'); // Get the slider
     const settingsIcon = document.getElementById('settingsIcon');
     const settingsPopup = document.getElementById('settingsPopup');
     const backgroundInput = document.getElementById('backgroundInput');
@@ -32,43 +35,92 @@ document.addEventListener("DOMContentLoaded", function() {
     const dateToggle = document.getElementById('dateToggle');
     const dateHeader = document.getElementById('dateHeader');
     const dateFormatInput = document.getElementById('dateFormat');
+    const showYearInput = document.getElementById('showYear');
+    const yearFormatInput = document.getElementById('yearFormat');
     const dateFontTypeInput = document.getElementById('dateFontType');
     const dateFontColorInput = document.getElementById('dateFontColor');
     const dateFontSizeInput = document.getElementById('dateFontSize');
     const datePositionInput = document.getElementById('datePosition');
     const showDateInput = document.getElementById('showDate');
 
-    // Load saved background from storage
-    chrome.storage.local.get(["background", "clockSettings", "dateSettings", "daySettings", "muteBackground"], function(data) {
-        if (data.background) {
-            applyBackground(data.background);
-        } else {
-            // Set default background if no custom background is selected
-            backgroundElement.style.backgroundImage = "url('assets/default_background.jpg')";
-        }
+    const defaultSettings = {
+        // Background settings
+        background: "assets/default_background.mp4",
+        muteBackground: true,
+        backgroundBlur: 0, // Default blur level (0 means no blur)
 
-        // Load clock settings
-        if (data.clockSettings) {
-            applyClockSettings(data.clockSettings);
-			showClockInput.checked = data.clockSettings.showClock !== undefined ? data.clockSettings.showClock : true;
-            clockElement.style.display = showClockInput.checked ? 'block' : 'none';
+        // Clock settings
+        clockSettings: {
+            showClock: true,
+            format: "12",
+            fontType: "Great Vibes",
+            color: "#ffffff",
+            size: "40",
+            position: "center",
+            showSeconds: false
+        },
+
+        // Day settings
+        daySettings: {
+            showDay: true,
+            style: "Full", 
+            fontType: "Anurati",
+            color: "#ffffff",
+            size: "90",
+            position: "day-center"
+        },
+
+        // Date settings
+        dateSettings: {
+            showDate: true,
+            format: "DD MMM", 
+            fontType: "Great Vibes",
+            color: "#ffffff",
+            size: "50",
+            position: "d-center",
+            showYear: true,
+            yearFormat: "full" 
         }
-		
-		// Load date settings
-		if (data.dateSettings) {
-            applyDateSettings(data.dateSettings);
-        }
-		// Load day settings
-        if (data.daySettings) {
-            applyDaySettings(data.daySettings);
-        }
-		// Load mute/unmute settings
-        if (data.muteBackground !== undefined) {
-            muteBackgroundInput.checked = data.muteBackground;
-            toggleBackgroundSound(data.muteBackground);
-        } else {
-            muteBackgroundInput.checked = false; // Default is unmuted
-        }
+    };
+    chrome.storage.local.get(["background", "clockSettings", "daySettings", "dateSettings", "muteBackground", "backgroundBlur"], function (data) {
+
+    if (data.background) {
+        applyBackground(data.background);
+    } else {
+        applyBackground(defaultSettings.background); // Use default background
+    }
+
+        const blurValue = data.backgroundBlur !== undefined ? data.backgroundBlur : defaultSettings.backgroundBlur;
+        backgroundBlurInput.value = blurValue; // Set the slider value
+        updateBackgroundBlur(blurValue); // Apply initial blur
+
+    // Apply clock settings
+    if (data.clockSettings) {
+        applyClockSettings(data.clockSettings);
+    } else {
+        applyClockSettings(defaultSettings.clockSettings); // Use default clock settings
+    }
+
+    // Apply day settings
+    if (data.daySettings) {
+        applyDaySettings(data.daySettings);
+    } else {
+        applyDaySettings(defaultSettings.daySettings); // Use default day settings
+    }
+
+    // Apply date settings
+    if (data.dateSettings) {
+        applyDateSettings(data.dateSettings);
+    } else {
+        applyDateSettings(defaultSettings.dateSettings); // Use default date settings
+    }
+
+    // Apply mute setting
+    if (data.muteBackground !== undefined) {
+        toggleBackgroundSound(data.muteBackground);
+    } else {
+        toggleBackgroundSound(defaultSettings.muteBackground); // Use default mute setting
+    }
     });
 
     // Show settings popup when settings icon is clicked
@@ -108,7 +160,44 @@ document.addEventListener("DOMContentLoaded", function() {
          }
 		}
     });
+    // Event listener for background selection
+    backgroundSelect.addEventListener('change', function () {
+        const selectedValue = this.value;
 
+        if (selectedValue === "custom") {
+            customBackgroundLabel.style.display = 'block'; // Show label
+            backgroundInput.style.display = 'block'; // Show file input
+
+            // Check if there's a saved custom background
+            chrome.storage.local.get('customBackground', function (result) {
+                if (result.customBackground) {
+                    applyBackground(result.customBackground); // Load and apply the last saved custom background
+                }
+            });
+        } else {
+            customBackgroundLabel.style.display = 'none'; // Hide label
+            backgroundInput.style.display = 'none'; // Hide file input
+            applyBackground(selectedValue); // Apply selected predefined background
+        }
+    });
+
+    // Handle file selection for custom background
+    backgroundInput.addEventListener("change", function (event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const customBackgroundData = e.target.result;
+                applyBackground(customBackgroundData); // Apply the new custom background
+
+                // Save the custom background in storage
+                chrome.storage.local.set({ customBackground: customBackgroundData }, function () {
+                    console.log("Custom background saved.");
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    });
     // Mute/Unmute background sound based on user input
     muteBackgroundInput.addEventListener("change", function() {
         const isMuted = muteBackgroundInput.checked;
@@ -129,19 +218,66 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 	
-    // Function to apply background
     function applyBackground(data) {
-        if (data.startsWith("data:video")) {
-            backgroundElement.innerHTML = `<video autoplay loop ${muteBackgroundInput.checked ? "muted" : ""} style="width: 100%; height: 100%; object-fit: cover;">
-                                                <source src="${data}" type="video/mp4">
-                                            </video>`;
+        // Check if the data is empty and set to default if needed
+        if (!data || data === defaultSettings.background) {
+            data = defaultSettings.background; // Use default background
+        }
+
+        // Clear existing content in the backgroundElement
+        backgroundElement.innerHTML = '';
+
+        // Determine if the data is a video, image, or GIF
+        if (data.endsWith(".mp4") || data.startsWith("data:video")) {
+            // If the background is a video
+            const video = document.createElement('video');
+            video.src = data; // Set the video source
+            video.autoplay = true; // Automatically play the video
+            video.loop = true; // Loop the video
+            video.muted = muteBackgroundInput.checked; // Mute if checkbox is checked
+            video.style.width = '100%'; // Full width
+            video.style.height = '100%'; // Full height
+            video.style.objectFit = 'cover'; // Cover the entire container
+            video.style.position = 'absolute'; // Position absolute for full coverage
+
+            // Append the video element to the backgroundElement
+            backgroundElement.appendChild(video);
+
+            // Add event listeners to handle video load
+            video.onloadeddata = function () {
+                // Video is loaded and can start playing
+                video.play();
+            };
+
+            video.onerror = function () {
+                console.error("Error loading video:", video.src);
+            };
+
         } else {
+            // If the background is an image or GIF
             backgroundElement.style.backgroundImage = `url(${data})`;
-            backgroundElement.innerHTML = ""; // Clear any existing video
+            backgroundElement.style.backgroundSize = 'cover'; // Cover the entire container
+            backgroundElement.style.backgroundPosition = 'center'; // Center the background
+            backgroundElement.style.position = 'absolute'; // Position absolute for full coverage
+
+            // For GIFs, we don't need to add a separate element since they work as background images
         }
     }
-	
 
+	
+    backgroundBlurInput.addEventListener('input', function() {
+    const blurValue = this.value; // Get the current value of the slider
+    updateBackgroundBlur(blurValue); // Apply the blur effect
+    // Save the current blur level to storage
+    chrome.storage.local.set({ backgroundBlur: blurValue }, function() {
+        console.log("Background blur level saved:", blurValue);
+    });
+});
+
+// Function to apply blur effect to the background
+function updateBackgroundBlur(value) {
+    backgroundElement.style.filter = `blur(${value}px)`; // Apply CSS blur filter
+}
 	
     backgroundHeader.addEventListener("click", () => {
         backgroundSettings.style.display = backgroundSettings.style.display === "block" ? "none" : "block";
@@ -198,7 +334,6 @@ document.addEventListener("DOMContentLoaded", function() {
         // Save the clock visibility in chrome storage
         const clockSettings = {
             showClock: showClockInput.checked,
-            // Keep existing settings
             format: timeFormatInput.value,
             fontType: fontTypeInput.value,
             color: fontColorInput.value,
@@ -225,13 +360,13 @@ document.addEventListener("DOMContentLoaded", function() {
             hours = hours % 12 || 12;
             // Add leading zeros for single-digit minutes and seconds
             clockElement.textContent = showSecondsInput.checked 
-                ? `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')} ${ampm}`
-                : `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} ${ampm}`;
+                ? `- ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')} ${ampm} -`
+                : `- ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} ${ampm} -`;
         } else {
             // Add leading zeros for single-digit hours, minutes, and seconds
             clockElement.textContent = showSecondsInput.checked 
-                ? `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
-                : `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+                ? `- ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')} -`
+                : `- ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} -`;
         }
 
         setTimeout(updateClock, 1000);
@@ -386,11 +521,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Apply the day settings
     function applyDaySettings(settings) {
-        dayStyleInput.value = settings.style || "Full"; // Ensure dayStyleInput is defined
-        dayFontTypeInput.value = settings.fontType || "Arial";
+        dayStyleInput.value = settings.style || "Full"; 
+        dayFontTypeInput.value = settings.fontType || "Anurati";
         dayFontColorInput.value = settings.color || "#ffffff";
-        dayFontSizeInput.value = settings.size || "20";
-        dayPositionInput.value = settings.position || "day-top-right";
+        dayFontSizeInput.value = settings.size || "60";
+        dayPositionInput.value = settings.position || "day-center";
         showDayInput.checked = settings.showDay !== undefined ? settings.showDay : true;
 
         dayElement.style.fontFamily = dayFontTypeInput.value;
@@ -493,36 +628,75 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
 
-//---------------->DATE<-----------------//
+    //---------------->DATE<-----------------//
 
     // Update the date display
     function updateDate() {
         const now = new Date();
         const format = dateFormatInput.value;
+        const showYear = showYearInput.checked;
+        const yearFormat = yearFormatInput.value; // "full" or "short"
+
+        let yearString = now.getFullYear();
+        if (yearFormat === "short") {
+            yearString = String(yearString).slice(-2); // Shorten year to 2 digits
+        }
 
         let dateString = '';
         switch (format) {
             case 'MM/DD/YYYY':
-                dateString = `${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}/${now.getFullYear()}`;
+                dateString = `${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}`;
+                if (showYear) {
+                    dateString += `/${yearString}`;
+                }
                 break;
             case 'DD/MM/YYYY':
-                dateString = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+                dateString = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}`;
+                if (showYear) {
+                    dateString += `/${yearString}`;
+                }
                 break;
             case 'YYYY-MM-DD':
-                dateString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+                if (showYear) {
+                    dateString = `${yearString}-`;
+                }
+                dateString += `${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+                break;
+            case 'DD MMM': // Format: 18 Sep
+                dateString = `${now.getDate()} ${now.toLocaleString('en-US', { month: 'short' })}`;
+                if (showYear) {
+                    dateString += ` ${yearString}`;
+                }
+                break;
+            case 'DD MMMM': // Format: 18 September
+                dateString = `${now.getDate()} ${now.toLocaleString('en-US', { month: 'long' })}`;
+                if (showYear) {
+                    dateString += ` ${yearString}`;
+                }
                 break;
         }
         dateElement.textContent = dateString;
     }
 
+    function toggleYearFormatVisibility() {
+        const yearFormatContainer = document.getElementById('yearFormatContainer');
+        if (showYearInput.checked) {
+            yearFormatContainer.style.display = 'block'; // Show the year format dropdown
+        } else {
+            yearFormatContainer.style.display = 'none';  // Hide the year format dropdown
+        }
+    }
+    // Apply the date settings
     // Apply the date settings
     function applyDateSettings(settings) {
         dateFormatInput.value = settings.format || "MM/DD/YYYY";
-        dateFontTypeInput.value = settings.fontType || "Arial";
+        dateFontTypeInput.value = settings.fontType || "Anurati";
         dateFontColorInput.value = settings.color || "#ffffff";
-        dateFontSizeInput.value = settings.size || "20";
-        datePositionInput.value = settings.position || "top-right";
+        dateFontSizeInput.value = settings.size || "45";
+        datePositionInput.value = settings.position || "d-center";
         showDateInput.checked = settings.showDate !== undefined ? settings.showDate : true;
+        showYearInput.checked = settings.showYear !== undefined ? settings.showYear : true;
+        yearFormatInput.value = settings.yearFormat || "full";
 
         dateElement.style.fontFamily = dateFontTypeInput.value;
         dateElement.style.color = dateFontColorInput.value;
@@ -532,9 +706,14 @@ document.addEventListener("DOMContentLoaded", function() {
         // Show or hide date
         dateElement.style.display = showDateInput.checked ? 'block' : 'none';
 
+        // Toggle the visibility of the year format dropdown
+        toggleYearFormatVisibility();
+
         // Update the date immediately
         updateDate();
     }
+    showYearInput.addEventListener('change', toggleYearFormatVisibility);
+    toggleYearFormatVisibility();
 
     // Update date position
     function updateDatePosition(position) {
@@ -563,17 +742,19 @@ document.addEventListener("DOMContentLoaded", function() {
     updatedateFontSizeLabel();
 
     // Save date settings
-    [dateFormatInput, dateFontTypeInput, dateFontColorInput, dateFontSizeInput, datePositionInput, showDateInput].forEach(input => {
-        input.addEventListener("change", function() {
+    [dateFormatInput, dateFontTypeInput, dateFontColorInput, dateFontSizeInput, datePositionInput, showDateInput, showYearInput, yearFormatInput].forEach(input => {
+        input.addEventListener("change", function () {
             const dateSettings = {
                 format: dateFormatInput.value,
                 fontType: dateFontTypeInput.value,
                 color: dateFontColorInput.value,
                 size: dateFontSizeInput.value,
                 position: datePositionInput.value,
-                showDate: showDateInput.checked
+                showDate: showDateInput.checked,
+                showYear: showYearInput.checked,
+                yearFormat: yearFormatInput.value
             };
-            chrome.storage.local.set({ dateSettings: dateSettings }, function() {
+            chrome.storage.local.set({ dateSettings: dateSettings }, function () {
                 console.log("Date settings saved.");
             });
             applyDateSettings(dateSettings);
@@ -584,7 +765,7 @@ document.addEventListener("DOMContentLoaded", function() {
     updateDate();
 
     // Update the date live if the color is changed
-    dateFontColorInput.addEventListener('input', function() {
+    dateFontColorInput.addEventListener('input', function () {
         dateElement.style.color = dateFontColorInput.value;
     });
 
@@ -592,21 +773,21 @@ document.addEventListener("DOMContentLoaded", function() {
     function makeElementDraggable(element) {
         let offsetX, offsetY, isDragging = false;
 
-        element.addEventListener("mousedown", function(e) {
+        element.addEventListener("mousedown", function (e) {
             isDragging = true;
             offsetX = e.clientX - element.getBoundingClientRect().left;
             offsetY = e.clientY - element.getBoundingClientRect().top;
             element.style.position = 'absolute';
         });
 
-        document.addEventListener("mousemove", function(e) {
+        document.addEventListener("mousemove", function (e) {
             if (isDragging) {
                 element.style.left = (e.clientX - offsetX) + "px";
                 element.style.top = (e.clientY - offsetY) + "px";
             }
         });
 
-        document.addEventListener("mouseup", function() {
+        document.addEventListener("mouseup", function () {
             if (isDragging) {
                 isDragging = false;
 
@@ -615,17 +796,20 @@ document.addEventListener("DOMContentLoaded", function() {
                     left: element.style.left,
                     top: element.style.top
                 };
-                chrome.storage.local.set({ datePosition: position }, function() {
+                chrome.storage.local.set({ datePosition: position }, function () {
                     console.log("Date position saved:", position);
                 });
             }
         });
     }
+    document.getElementById('resetButton').addEventListener('click', function () {
+        // Clear Chrome storage and set the default settings
+        chrome.storage.local.set(defaultSettings, function () {
+            console.log("Default settings applied.");
+            location.reload(); // Reload to apply defaults
+        });
+    });
+
 });
 
 
-document.getElementById('resetButton').addEventListener('click', function() {
-    chrome.storage.local.clear(); // Clear Chrome local storage
-    localStorage.clear(); // Clear other local storage
-    location.reload(); // Reload to apply defaults
-});

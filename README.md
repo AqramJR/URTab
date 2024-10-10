@@ -4,7 +4,7 @@ URTab is a Brave browser extension that enhances the new tab experience with cus
 
 ## Features
 
-- Animated backgrounds (images, GIFs, videos)
+- Animated Customizable backgrounds (images, GIFs, videos)
 - Customizable Clock
 - Customizable Date
 - Customizable Day
@@ -21,8 +21,8 @@ URTab is a Brave browser extension that enhances the new tab experience with cus
 - ~~Add a day to the date~~
 - ~~Add some fonts, formats, positions~~
 - ~~Clean up the settings popup~~
+- ~~Set up the Default settings.~~
 - [ ] Implement an **Options Page** for additional customization.
 - [ ] Implement an **Welcome Page**.
-- [ ] Set up the Default settings.
 - [ ] Clean and optmaize the code.
 

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "URTab",
-  "version": "1.8",
+  "version": "2.0",
   "description": "Customize UR tab's background with any image, GIF, or video.",
   "chrome_url_overrides": {
     "newtab": "newtab.html"
