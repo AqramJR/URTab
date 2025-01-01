@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", function() {
-	
     const backgroundElement = document.getElementById('background');
     const muteBackgroundInput = document.getElementById('muteBackground');
     const backgroundSelect = document.getElementById('backgroundSelect');
@@ -42,7 +41,15 @@ document.addEventListener("DOMContentLoaded", function() {
     const dateFontSizeInput = document.getElementById('dateFontSize');
     const datePositionInput = document.getElementById('datePosition');
     const showDateInput = document.getElementById('showDate');
-
+    const animations = [
+        "pulse",
+        "spinner",
+        "dots",
+        "progress-bar",
+        "wave",
+        "glow",
+        "cube"
+    ];
     const defaultSettings = {
         // Background settings
         background: "assets/default_background.mp4",
@@ -82,13 +89,230 @@ document.addEventListener("DOMContentLoaded", function() {
             yearFormat: "full" 
         }
     };
-    chrome.storage.local.get(["background", "clockSettings", "daySettings", "dateSettings", "muteBackground", "backgroundBlur"], function (data) {
+    function syncSettingsMenu() {
+        chrome.storage.local.get(["backgroundKey", "clockSettings", "daySettings", "dateSettings", "muteBackground", "backgroundBlur"], function (data) {
+            // Sync Background Settings
+            if (data.backgroundKey) {
+                backgroundSelect.value = "custom";
+                customBackgroundLabel.style.display = 'block';
+                backgroundInput.style.display = 'block';
+            } else {
+                backgroundSelect.value = defaultSettings.background;
+            }
 
-    if (data.background) {
-        applyBackground(data.background);
-    } else {
-        applyBackground(defaultSettings.background); // Use default background
+            if (data.muteBackground !== undefined) {
+                muteBackgroundInput.checked = data.muteBackground;
+            } else {
+                muteBackgroundInput.checked = defaultSettings.muteBackground;
+            }
+
+            if (data.backgroundBlur !== undefined) {
+                backgroundBlurInput.value = data.backgroundBlur;
+            } else {
+                backgroundBlurInput.value = defaultSettings.backgroundBlur;
+            }
+
+            // Sync Clock Settings
+            if (data.clockSettings) {
+                showClockInput.checked = data.clockSettings.showClock;
+                timeFormatInput.value = data.clockSettings.format;
+                fontTypeInput.value = data.clockSettings.fontType;
+                fontColorInput.value = data.clockSettings.color;
+                ClockFontSizeInput.value = data.clockSettings.size;
+                clockPositionInput.value = data.clockSettings.position;
+                showSecondsInput.checked = data.clockSettings.showSeconds;
+            } else {
+                showClockInput.checked = defaultSettings.clockSettings.showClock;
+                timeFormatInput.value = defaultSettings.clockSettings.format;
+                fontTypeInput.value = defaultSettings.clockSettings.fontType;
+                fontColorInput.value = defaultSettings.clockSettings.color;
+                ClockFontSizeInput.value = defaultSettings.clockSettings.size;
+                clockPositionInput.value = defaultSettings.clockSettings.position;
+                showSecondsInput.checked = defaultSettings.clockSettings.showSeconds;
+            }
+
+            // Sync Day Settings
+            if (data.daySettings) {
+                showDayInput.checked = data.daySettings.showDay;
+                dayStyleInput.value = data.daySettings.style;
+                dayFontTypeInput.value = data.daySettings.fontType;
+                dayFontColorInput.value = data.daySettings.color;
+                dayFontSizeInput.value = data.daySettings.size;
+                dayPositionInput.value = data.daySettings.position;
+            } else {
+                showDayInput.checked = defaultSettings.daySettings.showDay;
+                dayStyleInput.value = defaultSettings.daySettings.style;
+                dayFontTypeInput.value = defaultSettings.daySettings.fontType;
+                dayFontColorInput.value = defaultSettings.daySettings.color;
+                dayFontSizeInput.value = defaultSettings.daySettings.size;
+                dayPositionInput.value = defaultSettings.daySettings.position;
+            }
+
+            // Sync Date Settings
+            if (data.dateSettings) {
+                showDateInput.checked = data.dateSettings.showDate;
+                showYearInput.checked = data.dateSettings.showYear;
+                yearFormatInput.value = data.dateSettings.yearFormat;
+                dateFormatInput.value = data.dateSettings.format;
+                dateFontTypeInput.value = data.dateSettings.fontType;
+                dateFontColorInput.value = data.dateSettings.color;
+                dateFontSizeInput.value = data.dateSettings.size;
+                datePositionInput.value = data.dateSettings.position;
+            } else {
+                showDateInput.checked = defaultSettings.dateSettings.showDate;
+                showYearInput.checked = defaultSettings.dateSettings.showYear;
+                yearFormatInput.value = defaultSettings.dateSettings.yearFormat;
+                dateFormatInput.value = defaultSettings.dateSettings.format;
+                dateFontTypeInput.value = defaultSettings.dateSettings.fontType;
+                dateFontColorInput.value = defaultSettings.dateSettings.color;
+                dateFontSizeInput.value = defaultSettings.dateSettings.size;
+                datePositionInput.value = defaultSettings.dateSettings.position;
+            }
+        });
     }
+    syncSettingsMenu();
+    // Function to apply a random loading animation
+    function applyRandomAnimation() {
+        const loadingScreen = document.getElementById("loadingScreen");
+        const loader = document.createElement("div");
+        loader.className = "loader";
+
+        // Randomly select an animation
+        const randomAnimation = animations[Math.floor(Math.random() * animations.length)];
+        loader.classList.add(randomAnimation);
+
+        // Add dots or wave elements if needed
+        if (randomAnimation === "dots") {
+            loader.innerHTML = `<div></div><div></div><div></div>`;
+        } else if (randomAnimation === "wave") {
+            loader.innerHTML = `<div></div><div></div><div></div><div></div>`;
+        } else if (randomAnimation === "cube") {
+            loader.innerHTML = `<div></div><div></div><div></div><div></div><div></div><div></div>`;
+        }
+
+        // Clear any existing loader and add the new one
+        loadingScreen.innerHTML = '';
+        loadingScreen.appendChild(loader);
+    }
+
+    applyRandomAnimation(); // Apply a random animation
+
+    // Function to hide the loading screen
+    function hideLoadingScreen() {
+        const loadingScreen = document.getElementById("loadingScreen");
+        loadingScreen.style.opacity = "0";
+
+        setTimeout(function () {
+            loadingScreen.style.display = "none";
+        }, 500); // Match the transition duration (0.5s)
+    }
+
+    function hideLoadingScreenAfterBackgroundLoad() {
+        const loadingScreen = document.getElementById("loadingScreen");
+        const background = backgroundElement.querySelector("video") || backgroundElement.querySelector("img");
+
+        if (background) {
+            background.addEventListener("loadeddata", function () {
+                // For video backgrounds
+                loadingScreen.style.opacity = "0";
+                setTimeout(function () {
+                    loadingScreen.style.display = "none";
+                }, 500); // Match the transition duration (0.5s)
+            });
+
+            background.addEventListener("error", function () {
+                // If the background fails to load, hide the loading screen anyway
+                loadingScreen.style.opacity = "0";
+                setTimeout(function () {
+                    loadingScreen.style.display = "none";
+                }, 500);
+            });
+        } else {
+            // For image or GIF backgrounds
+            backgroundElement.addEventListener("load", function () {
+                loadingScreen.style.opacity = "0";
+                setTimeout(function () {
+                    loadingScreen.style.display = "none";
+                }, 500);
+            });
+
+            backgroundElement.addEventListener("error", function () {
+                // If the background fails to load, hide the loading screen anyway
+                loadingScreen.style.opacity = "0";
+                setTimeout(function () {
+                    loadingScreen.style.display = "none";
+                }, 500);
+            });
+        }
+    }
+
+    function storeFileInIndexedDB(file, callback) {
+        const request = indexedDB.open("BackgroundDB", 1);
+
+        request.onupgradeneeded = function (event) {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains('backgrounds')) {
+                db.createObjectStore('backgrounds');
+            }
+        };
+
+        request.onsuccess = function (event) {
+            const db = event.target.result;
+            const transaction = db.transaction('backgrounds', 'readwrite');
+            const store = transaction.objectStore('backgrounds');
+            const fileRequest = store.put(file, 'background');
+
+            fileRequest.onsuccess = function () {
+                callback(null, 'background');
+            };
+
+            fileRequest.onerror = function (error) {
+                callback(error);
+            };
+        };
+
+        request.onerror = function (error) {
+            callback(error);
+        };
+    }
+
+    function getFileFromIndexedDB(key, callback) {
+        const request = indexedDB.open("BackgroundDB", 1);
+
+        request.onsuccess = function (event) {
+            const db = event.target.result;
+            const transaction = db.transaction('backgrounds', 'readonly');
+            const store = transaction.objectStore('backgrounds');
+            const fileRequest = store.get(key);
+
+            fileRequest.onsuccess = function () {
+                callback(null, fileRequest.result);
+            };
+
+            fileRequest.onerror = function (error) {
+                callback(error);
+            };
+        };
+
+        request.onerror = function (error) {
+            callback(error);
+        };
+    }
+    chrome.storage.local.get(["backgroundKey", "clockSettings", "daySettings", "dateSettings", "muteBackground", "backgroundBlur"], function (data) {
+
+        if (data.backgroundKey) {
+            getFileFromIndexedDB(data.backgroundKey, function (error, file) {
+                if (error) {
+                    console.error("Error retrieving file from IndexedDB:", error);
+                    applyBackground(defaultSettings.background); // Fallback to default
+                    return;
+                }
+
+                applyBackground(file); // Apply the background from IndexedDB
+            });
+        } else {
+            applyBackground(defaultSettings.background); // Fallback to default
+        }
 
         const blurValue = data.backgroundBlur !== undefined ? data.backgroundBlur : defaultSettings.backgroundBlur;
         backgroundBlurInput.value = blurValue; // Set the slider value
@@ -127,39 +351,69 @@ document.addEventListener("DOMContentLoaded", function() {
     settingsIcon.addEventListener("click", function() {
         settingsPopup.style.display = settingsPopup.style.display === 'block' ? 'none' : 'block';
     });
+    // Close settings menu when clicking outside
+    document.addEventListener("click", function (event) {
+        const isClickInsidePopup = settingsPopup.contains(event.target);
+        const isClickOnSettingsIcon = settingsIcon.contains(event.target);
+
+        if (!isClickInsidePopup && !isClickOnSettingsIcon) {
+            settingsPopup.style.display = 'none';
+        }
+    });
 
     // Handle background selection
-    backgroundInput.addEventListener("change", function(event) {
-		
-		// limit size to 5MB
-		const file = event.target.files[0];
-        if (file.size > 5 * 1024 * 1024) {
-           alert("Background file must be under 5MB.");
-           return;
+    backgroundInput.addEventListener("change", function (event) {
+        const file = event.target.files[0];
+        if (file.size > 200 * 1024 * 1024) { 
+            alert("Background file must be under 200MB.");
+            return;
         }
-		else if (file.size < 5 * 1024 * 1024) {
-          if (event.target.files.length > 0) {
-             const file = event.target.files[0];
-             const reader = new FileReader();
 
-             reader.onload = function(e) {
-                 const backgroundData = e.target.result;
-                 applyBackground(backgroundData);
+        // Show loading screen
+        const loadingScreen = document.getElementById("loadingScreen");
+        loadingScreen.style.display = "flex";
+        loadingScreen.style.opacity = "1";
+        applyRandomAnimation(); // Apply a random animation
+        storeFileInIndexedDB(file, function (error, key) {
+            if (error) {
+                console.error("Error storing file in IndexedDB:", error);
+                hideLoadingScreen(); // Hide loading screen if there's an error
+                return;
+            }
 
-                // Save the selected background in local storage
-                 chrome.storage.local.set({ background: backgroundData }, function() {
-                     if (chrome.runtime.lastError) {
-                         console.error("Error saving background:", chrome.runtime.lastError);
-                     } else {
-                         console.log("Background saved.");
-                     }
-                 });
+            // Save the key to chrome.storage.local
+            chrome.storage.local.set({ backgroundKey: key }, function () {
+                console.log("Background key saved.");
+            });
+
+            // Apply the background
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                applyBackground(e.target.result);
             };
-
             reader.readAsDataURL(file);
-         }
-		}
+        });
     });
+    // Retrieve background from IndexedDB on page load
+    chrome.storage.local.get(["backgroundKey"], function (data) {
+        if (data.backgroundKey) {
+            getFileFromIndexedDB(data.backgroundKey, function (error, file) {
+                if (error) {
+                    console.error("Error retrieving file from IndexedDB:", error);
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    applyBackground(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            });
+        } else {
+            applyBackground(defaultSettings.background);
+        }
+    });
+
     // Event listener for background selection
     backgroundSelect.addEventListener('change', function () {
         const selectedValue = this.value;
@@ -217,54 +471,79 @@ document.addEventListener("DOMContentLoaded", function() {
             videoElement.muted = mute;
         }
     }
-	
+    // Function to apply the background and track its loading
     function applyBackground(data) {
-        // Check if the data is empty and set to default if needed
         if (!data || data === defaultSettings.background) {
-            data = defaultSettings.background; // Use default background
+            data = defaultSettings.background;
         }
 
-        // Clear existing content in the backgroundElement
         backgroundElement.innerHTML = '';
 
-        // Determine if the data is a video, image, or GIF
-        if (data.endsWith(".mp4") || data.startsWith("data:video")) {
-            // If the background is a video
+        if (typeof data === 'string' && (data.endsWith(".mp4") || data.startsWith("data:video"))) {
+            // Handle default or DataURL backgrounds
             const video = document.createElement('video');
-            video.src = data; // Set the video source
-            video.autoplay = true; // Automatically play the video
-            video.loop = true; // Loop the video
-            video.muted = muteBackgroundInput.checked; // Mute if checkbox is checked
-            video.style.width = '100%'; // Full width
-            video.style.height = '100%'; // Full height
-            video.style.objectFit = 'cover'; // Cover the entire container
-            video.style.position = 'absolute'; // Position absolute for full coverage
+            video.src = data;
+            video.autoplay = true;
+            video.loop = true;
+            video.muted = muteBackgroundInput.checked;
+            video.style.width = '100%';
+            video.style.height = '100%';
+            video.style.objectFit = 'cover';
+            video.style.position = 'absolute';
 
-            // Append the video element to the backgroundElement
             backgroundElement.appendChild(video);
 
-            // Add event listeners to handle video load
             video.onloadeddata = function () {
-                // Video is loaded and can start playing
                 video.play();
+                hideLoadingScreen(); // Hide loading screen after video loads
             };
 
             video.onerror = function () {
                 console.error("Error loading video:", video.src);
+                hideLoadingScreen(); // Hide loading screen even if video fails
+            };
+        } else if (data instanceof Blob || data instanceof File) {
+            // Handle Blob or File objects
+            const video = document.createElement('video');
+            video.src = URL.createObjectURL(data); // Use Blob URL
+            video.autoplay = true;
+            video.loop = true;
+            video.muted = muteBackgroundInput.checked;
+            video.style.width = '100%';
+            video.style.height = '100%';
+            video.style.objectFit = 'cover';
+            video.style.position = 'absolute';
+
+            backgroundElement.appendChild(video);
+
+            video.onloadeddata = function () {
+                video.play();
+                hideLoadingScreen(); // Hide loading screen after video loads
             };
 
+            video.onerror = function () {
+                console.error("Error loading video:", video.src);
+                hideLoadingScreen(); // Hide loading screen even if video fails
+            };
         } else {
-            // If the background is an image or GIF
-            backgroundElement.style.backgroundImage = `url(${data})`;
-            backgroundElement.style.backgroundSize = 'cover'; // Cover the entire container
-            backgroundElement.style.backgroundPosition = 'center'; // Center the background
-            backgroundElement.style.position = 'absolute'; // Position absolute for full coverage
+            // Handle image or GIF backgrounds
+            const img = new Image();
+            img.src = data;
+            img.onload = function () {
+                backgroundElement.style.backgroundImage = `url(${data})`;
+                backgroundElement.style.backgroundSize = 'cover';
+                backgroundElement.style.backgroundPosition = 'center';
+                backgroundElement.style.position = 'absolute';
+                hideLoadingScreen(); // Hide loading screen after image loads
+            };
 
-            // For GIFs, we don't need to add a separate element since they work as background images
+            img.onerror = function () {
+                console.error("Error loading image:", data);
+                hideLoadingScreen(); // Hide loading screen even if image fails
+            };
         }
     }
 
-	
     backgroundBlurInput.addEventListener('input', function() {
     const blurValue = this.value; // Get the current value of the slider
     updateBackgroundBlur(blurValue); // Apply the blur effect
@@ -495,7 +774,6 @@ function updateBackgroundBlur(value) {
         // Update clock initially
         updateClock();
 		
-		
     //-------------------------->DAY<-------------------------//
     // Update the day display
     function updateDay() {
@@ -626,10 +904,7 @@ function updateBackgroundBlur(value) {
             }
         });
     }
-
-
     //---------------->DATE<-----------------//
-
     // Update the date display
     function updateDate() {
         const now = new Date();
@@ -686,7 +961,6 @@ function updateBackgroundBlur(value) {
             yearFormatContainer.style.display = 'none';  // Hide the year format dropdown
         }
     }
-    // Apply the date settings
     // Apply the date settings
     function applyDateSettings(settings) {
         dateFormatInput.value = settings.format || "MM/DD/YYYY";
@@ -803,11 +1077,17 @@ function updateBackgroundBlur(value) {
         });
     }
     document.getElementById('resetButton').addEventListener('click', function () {
-        // Clear Chrome storage and set the default settings
+        // Clear the background key from storage
+        chrome.storage.local.remove("backgroundKey", function () {
+            console.log("Background key cleared.");
+            // Apply the default background
+            applyBackground(defaultSettings.background);
+        });
         chrome.storage.local.set(defaultSettings, function () {
             console.log("Default settings applied.");
-            location.reload(); // Reload to apply defaults
         });
+        location.reload(); // Reload to apply defaults
+
     });
 
 });

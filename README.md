@@ -1,13 +1,11 @@
 # URTab: A Customizable New Tab Page for Brave Browser
 
-URTab is a Brave browser extension that enhances the new tab experience with customizable animated backgrounds, a live clock, and user-friendly settings.
+URTab is a Brave/Chrome browser extension that enhances the new tab experience with customizable animated backgrounds, a live clock, and user-friendly settings.
 
 ## Features
 
 - Animated Customizable backgrounds (images, GIFs, videos)
-- Customizable Clock
-- Customizable Date
-- Customizable Day
+- Customizable Clock/Date
 - Easy access settings popup
 
 ## TODO List
@@ -22,7 +20,8 @@ URTab is a Brave browser extension that enhances the new tab experience with cus
 - ~~Add some fonts, formats, positions~~
 - ~~Clean up the settings popup~~
 - ~~Set up the Default settings.~~
-- [ ] Implement an **Options Page** for additional customization.
+- ~~Increase background limit to 200MB.
 - [ ] Implement an **Welcome Page**.
+- [ ] Implement **Weather Widget**.
 - [ ] Clean and optmaize the code.
 
