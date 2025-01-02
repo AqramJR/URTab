@@ -21,7 +21,6 @@ URTab is a Brave/Chrome browser extension that enhances the new tab experience w
 - ~~Clean up the settings popup~~
 - ~~Set up the Default settings.~~
 - ~~Increase background limit to 200MB.~~
+- ~~Clean and optimize the code.~~
 - [ ] Implement an **Welcome Page**.
 - [ ] Implement **Weather Widget**.
-- [ ] Clean and optmaize the code.
-
