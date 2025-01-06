@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="fonts.css">
+    <link rel="stylesheet" type="text/css" href="loading.css">
+    <link rel="stylesheet" type="text/css" href="positions.css">
     <title>Custom New Tab</title>
 </head>
 
@@ -13,20 +16,22 @@
     <div id="background">
         <div id="backgroundContent"></div>
     </div>
-    <div id="clock" class="clock"></div>
-    <div id="date" class="date"></div>
-    <div id="day" class="day"></div>
+    <div id="clock" class="clock draggable"></div>
+    <div id="day" class="day draggable"></div>
+    <div id="date" class="date draggable"></div>
+    <div id="favoriteSites" class="favorite-sites draggable"></div>
 
     <img id="settingsIcon" src="assets/settingsicon.png" alt="Settings" />
 
     <!-- Popup for settings -->
     <div id="settingsPopup" class="popup">
+
         <div id="backgroundHeader" class="settings-header">
-            <span>Background Settings</span>
+            <span>Background</span>
             <span id="backgroundToggle">▼</span>
         </div>
         <div id="backgroundSettings" class="settings-group">
-            <label for="backgroundSelect">Select Background:</label>
+            <label for="backgroundSelect" title="Choose a predefined background or upload your own.">Select Background:</label>
             <select id="backgroundSelect">
                 <option value="assets/default_background.mp4">Default Background</option>
                 <option value="assets/background1.mp4">Background 1</option>
@@ -38,21 +43,52 @@
 
             <label for="backgroundInput" id="customBackgroundLabel" style="display: none;">Select Background (Image/GIF/Video):</label>
             <input type="file" id="backgroundInput" accept="image/*,video/*" style="display: none;"><br><br>
-            <label for="muteBackground">Mute Background Sound</label>
-            <input type="checkbox" id="muteBackground"><br><br>
-            <label for="backgroundBlur">Background Blur:</label>
-            <input type="range" id="backgroundBlur" min="0" max="100" value="0"><br><br>
 
+
+            <!-- mute -->
+            <div class="mute-container">
+                <input type="checkbox" id="muteBackground" style="display: none;">
+                <label for="muteBackground" class="toggleSwitch">
+                    <div class="speaker">
+                        <svg xmlns="http://www.w3.org/2000/svg" version="1.0" viewBox="0 0 75 75">
+                            <path d="M39.389,13.769 L22.235,28.606 L6,28.606 L6,47.699 L21.989,47.699 L39.389,62.75 L39.389,13.769z" style="stroke:#fff;stroke-width:5;stroke-linejoin:round;fill:#fff;"></path>
+                            <path d="M48,27.6a19.5,19.5 0 0 1 0,21.4M55.1,20.5a30,30 0 0 1 0,35.6M61.6,14a38.8,38.8 0 0 1 0,48.6" style="fill:none;stroke:#fff;stroke-width:5;stroke-linecap:round"></path>
+                        </svg>
+                    </div>
+                    <div class="mute-speaker">
+                        <svg version="1.0" viewBox="0 0 75 75" stroke="#fff" stroke-width="5">
+                            <path d="m39,14-17,15H6V48H22l17,15z" fill="#fff" stroke-linejoin="round"></path>
+                            <path d="m49,26 20,24m0-24-20,24" fill="#fff" stroke-linecap="round"></path>
+                        </svg>
+                    </div>
+                </label>
+                <span class="hint" data-hint-mute="Mute Background Sound" data-hint-unmute="Unmute Background Sound">Mute Background Sound</span>
+            </div>
+            <br><br>
+            <!-- mute -->
+
+            <label for="backgroundBlur">Background Blur:</label>
+            <input type="range" id="backgroundBlur" min="0" max="100" value="0" step="5"><br><br>
         </div><br>
 
         <!-- Clock Settings Section -->
         <div id="clockHeader" class="settings-header">
-            <span>Clock Settings</span>
+            <span>Clock</span>
             <span id="clockToggle">▼</span>
         </div>
         <div id="clockSettings" class="settings-group">
-            <label for="showClock">Show Clock:</label>
-            <input type="checkbox" id="showClock" checked><br><br>
+
+            <label for="showClock">Show Clock  </label>
+            <label for="showClock" class="switch">
+                <input type="checkbox" id="showClock" checked>
+                <span class="slider"></span>
+            </label><br><br>
+
+            <label for="showSeconds">Show Seconds:</label>
+            <label for="showSeconds" class="switch">
+                <input type="checkbox" id="showSeconds" checked>
+                <span class="slider"></span>
+            </label><br><br>
 
             <label for="timeFormat">Time Format:</label>
             <select id="timeFormat">
@@ -91,23 +127,27 @@
             <select id="clockPosition">
                 <option value="top-left">Top Left</option>
                 <option value="top-right">Top Right</option>
+                <option value="center">Center</option>
                 <option value="bottom-left">Bottom Left</option>
                 <option value="bottom-right">Bottom Right</option>
-                <option value="center">Center</option>
-                <option value="free">Free Drag</option>
-            </select><br><br>
+                <option value="free">Custom</option>
+            </select>
+            <button id="clockdragButton" style="display: none;">Drag</button><br><br>
 
-            <label for="showSeconds">Show Seconds:</label>
-            <input type="checkbox" id="showSeconds" checked><br><br>
         </div><br>
+
         <!-- Day Settings Section -->
         <div id="dayHeader" class="settings-header">
-            <span>Day Settings</span>
+            <span>Day</span>
             <span id="dayToggle">▼</span>
         </div>
         <div id="daySettings" class="settings-group">
-            <label for="showDay">Show Day:</label>
-            <input type="checkbox" id="showDay" checked><br><br>
+
+            <label for="showDay">Show Day</label>
+            <label for="showDay" class="switch">
+                <input type="checkbox" id="showDay" checked>
+                <span class="slider"></span>
+            </label><br><br>
 
             <label for="dayStyle">Day Style:</label>
             <select id="dayStyle">
@@ -145,23 +185,32 @@
             <select id="dayPosition">
                 <option value="day-top-left">Top Left</option>
                 <option value="day-top-right">Top Right</option>
+                <option value="day-center">Center</option>
                 <option value="day-bottom-left">Bottom Left</option>
                 <option value="day-bottom-right">Bottom Right</option>
-                <option value="day-center">Center</option>
-                <option value="free">Free Drag</option>
-            </select><br><br>
+                <option value="free">Custom</option>
+            </select>
+            <button id="dayDragButton" style="display: none;">Drag</button><br><br>
         </div><br>
 
         <!-- Date Settings Section -->
         <div id="dateHeader" class="settings-header">
-            <span>Date Settings</span>
+            <span>Date</span>
             <span id="dateToggle">▼</span>
         </div>
         <div id="dateSettings" class="settings-group">
-            <label for="showDate">Show Date:</label>
-            <input type="checkbox" id="showDate" checked><br><br>
-            <label for="showYear">Show Year:</label>
-            <input type="checkbox" id="showYear" checked><br><br>
+
+            <label for="showDate">Show Date</label>
+            <label for="showDate" class="switch">
+                <input type="checkbox" id="showDate" checked>
+                <span class="slider"></span>
+            </label><br><br>
+
+            <label for="showYear">Show Year</label>
+            <label for="showYear" class="switch">
+                <input type="checkbox" id="showYear" checked>
+                <span class="slider"></span>
+            </label><br><br>
 
             <div id="yearFormatContainer">
                 <label for="yearFormat">Year Format:</label>
@@ -211,12 +260,44 @@
             <select id="datePosition">
                 <option value="d-top-left">Top Left</option>
                 <option value="d-top-right">Top Right</option>
+                <option value="d-center">Center</option>
                 <option value="d-bottom-left">Bottom Left</option>
                 <option value="d-bottom-right">Bottom Right</option>
-                <option value="d-center">Center</option>
-                <option value="free">Free Drag</option>
-            </select><br><br>
+                <option value="free">Custom</option>
+            </select>
+            <button id="dateDragButton" style="display: none;">Drag</button><br><br>
         </div><br>
+
+        <!-- Favorite Sites Widget Settings -->
+        <div id="favoriteSitesHeader" class="settings-header">
+            <span>Sites</span>
+            <span id="favoriteSitesToggle">▼</span>
+        </div>
+        <div id="favoriteSitesSettings" class="settings-group">
+		
+		    <label for="showFavoriteSites">Show Sites Widget</label>
+            <label for="showFavoriteSites" class="switch">
+                <input type="checkbox" id="showFavoriteSites" checked>
+                <span class="slider"></span>
+            </label><br><br>
+
+
+            <label for="favoriteSitesSource">Sites Source:</label>
+            <select id="favoriteSitesSource">
+                <option value="most-viewed">Default</option>
+                <option value="user-custom">Custom "Soon"</option>
+            </select><br><br>
+            <label for="favoriteSitesPosition">Position:</label>
+            <select id="favoriteSitesPosition">
+                <option value="top-left">Top Left</option>
+                <option value="top-right">Top Right</option>
+                <option value="bottom-left">Bottom Left</option>
+                <option value="bottom-right">Bottom Right</option>
+                <option value="free">Custom</option>
+            </select>
+            <button id="siteDragButton" style="display: none;">Drag</button><br><br>
+        </div>
+
         <!-- Reset Button -->
         <button id="resetButton">Reset to Defaults</button>
     </div>

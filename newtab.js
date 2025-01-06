@@ -2,6 +2,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // Background Elements
     const backgroundElement = document.getElementById('background');
     const muteBackgroundInput = document.getElementById('muteBackground');
+    const muteCheckbox = document.getElementById('muteBackground');
+    const hintElement = document.querySelector('.hint');
     const backgroundSelect = document.getElementById('backgroundSelect');
     const customBackgroundLabel = document.getElementById('customBackgroundLabel');
     const backgroundToggle = document.getElementById('backgroundToggle');
@@ -22,6 +24,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const ClockFontSizeInput = document.getElementById('ClockFontSize');
     const clockPositionInput = document.getElementById('clockPosition');
     const showSecondsInput = document.getElementById('showSeconds');
+    const clockdragButton = document.getElementById('clockdragButton');
+    let isClockDraggingEnabled = false;
+  
 
     // Day Elements
     const dayElement = document.getElementById('day');
@@ -31,6 +36,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const dayFontColorInput = document.getElementById('dayFontColor');
     const dayFontSizeInput = document.getElementById('dayFontSize');
     const dayPositionInput = document.getElementById('dayPosition');
+    const dayDragButton = document.getElementById('dayDragButton');
+    let isDayDraggingEnabled = false;
 
     // Date Elements
     const dateElement = document.getElementById('date');
@@ -45,6 +52,17 @@ document.addEventListener("DOMContentLoaded", function () {
     const dateFontSizeInput = document.getElementById('dateFontSize');
     const datePositionInput = document.getElementById('datePosition');
     const showDateInput = document.getElementById('showDate');
+    const dateDragButton = document.getElementById('dateDragButton');
+    let isDateDraggingEnabled = false;
+
+    // Favorite Sites Widget Elements
+    const favoriteSitesElement = document.getElementById('favoriteSites');
+    const showFavoriteSitesInput = document.getElementById('showFavoriteSites');
+    const favoriteSitesSourceInput = document.getElementById('favoriteSitesSource');
+    const favoriteSitesPositionInput = document.getElementById('favoriteSitesPosition');
+    const siteDragButton = document.getElementById('siteDragButton');
+    let isSiteDraggingEnabled = false; // Track if dragging is enabled for Sites
+
 
     // Loading Animations
     const animations = [
@@ -62,7 +80,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Background settings
         background: "assets/default_background.mp4",
         muteBackground: true,
-        backgroundBlur: 0, 
+        backgroundBlur: 0,
 
         // Clock settings
         clockSettings: {
@@ -95,14 +113,24 @@ document.addEventListener("DOMContentLoaded", function () {
             position: "d-center",
             showYear: true,
             yearFormat: "full"
+        },
+
+        favoriteSitesSettings: {
+            showFavoriteSites: true,
+            source: "most-viewed", // "most-viewed" or "user-custom"
+            position: "top-left",
+            customSites: [] // Array of user-custom sites
         }
+
     };
+
+
 
 
     // ==================== Settings Synchronization ====================
     function syncSettingsMenu() {
         chrome.storage.local.get(
-            ["backgroundKey", "clockSettings", "daySettings", "dateSettings", "muteBackground", "backgroundBlur"],
+            ["backgroundKey", "clockSettings", "daySettings", "dateSettings", "muteBackground", "backgroundBlur", "favoriteSitesSettings"],
             function (data) {
                 // Sync Background Settings
                 if (data.backgroundKey) {
@@ -124,7 +152,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 } else {
                     backgroundBlurInput.value = defaultSettings.backgroundBlur;
                 }
-
+                if (data.favoriteSitesSettings) {
+                    applyFavoriteSitesSettings(data.favoriteSitesSettings);
+                } else {
+                    applyFavoriteSitesSettings(defaultSettings.favoriteSitesSettings);
+                }
                 // Sync Clock Settings
                 if (data.clockSettings) {
                     showClockInput.checked = data.clockSettings.showClock;
@@ -181,6 +213,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     dateFontSizeInput.value = defaultSettings.dateSettings.size;
                     datePositionInput.value = defaultSettings.dateSettings.position;
                 }
+
             }
         );
     }
@@ -219,37 +252,55 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ==================== Draggable Elements ====================
-    function makeElementDraggable(element, storageKey) {
+    function makeElementDraggable(element, storageKey, isDraggingEnabled) {
         let offsetX, offsetY, isDragging = false;
 
-        element.addEventListener("mousedown", function (e) {
+        // Store the event listeners on the element for later removal
+        element._onMouseDown = function (e) {
+            if (!isDraggingEnabled) return; // Only allow dragging if enabled
             isDragging = true;
             offsetX = e.clientX - element.getBoundingClientRect().left;
             offsetY = e.clientY - element.getBoundingClientRect().top;
             element.style.position = 'absolute';
-        });
+            element.style.cursor = 'grabbing'; // Change cursor to "grabbing" while dragging
+        };
 
-        document.addEventListener("mousemove", function (e) {
-            if (isDragging) {
+        element._onMouseMove = function (e) {
+            if (isDragging && isDraggingEnabled) {
                 element.style.left = (e.clientX - offsetX) + "px";
                 element.style.top = (e.clientY - offsetY) + "px";
             }
-        });
+        };
 
-        document.addEventListener("mouseup", function () {
-            if (isDragging) {
+        element._onMouseUp = function () {
+            if (isDragging && isDraggingEnabled) {
                 isDragging = false;
-
-                // Save the last drag position in chrome storage
-                const position = {
-                    left: element.style.left,
-                    top: element.style.top
-                };
-                chrome.storage.local.set({ [storageKey]: position }, function () {
-                    console.log(`${storageKey} saved:`, position);
-                });
+                element.style.cursor = 'grab'; // Change cursor back to "grab" after dragging
             }
-        });
+        };
+
+        // Attach the event listeners
+        element.addEventListener("mousedown", element._onMouseDown);
+        document.addEventListener("mousemove", element._onMouseMove);
+        document.addEventListener("mouseup", element._onMouseUp);
+
+        // Set the initial cursor style
+        element.style.cursor = 'grab';
+    }
+
+    function removeElementDraggable(element) {
+        // Remove the event listeners for dragging
+        element.removeEventListener("mousedown", element._onMouseDown);
+        document.removeEventListener("mousemove", element._onMouseMove);
+        document.removeEventListener("mouseup", element._onMouseUp);
+
+        // Reset the cursor style
+        element.style.cursor = 'default';
+
+        // Reset the saved handlers
+        delete element._onMouseDown;
+        delete element._onMouseMove;
+        delete element._onMouseUp;
     }
 
     // ==================== IndexedDB Functions ====================
@@ -317,6 +368,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (videoElement) {
             videoElement.muted = mute;
+        }
+    }
+
+    // Function to update the hint text
+    function updateHint() {
+        if (muteCheckbox.checked) {
+            hintElement.textContent = hintElement.getAttribute('data-hint-unmute'); // Show "Unmute"
+        } else {
+            hintElement.textContent = hintElement.getAttribute('data-hint-mute'); // Show "Mute"
         }
     }
 
@@ -430,27 +490,40 @@ document.addEventListener("DOMContentLoaded", function () {
         clockElement.classList.remove("top-left", "top-right", "bottom-left", "bottom-right", "center", "free");
 
         if (position !== "free") {
+            // Reset the clock's position to the default for the selected position
             clockElement.style.left = '';
             clockElement.style.top = '';
             clockElement.style.position = '';
-            removeElementDraggable(clockElement);
+            removeElementDraggable(clockElement); // Disable dragging
+            clockdragButton.style.display = 'none'; // Hide the drag button
+        } else {
+            clockElement.classList.add("free");
+            clockdragButton.style.display = 'inline-block'; // Show the drag button
         }
 
+        // Apply the selected position
         clockElement.classList.add(position);
 
+        // Retrieve the last saved position from chrome storage (only for "free" position)
         if (position === "free") {
-            // Retrieve the last saved position from chrome storage
             chrome.storage.local.get(['clockPosition'], function (data) {
                 if (data.clockPosition) {
                     clockElement.style.left = data.clockPosition.left;
                     clockElement.style.top = data.clockPosition.top;
                     clockElement.style.position = 'absolute';
                 }
-                makeElementDraggable(clockElement, 'clockPosition');
             });
         }
     }
-
+    function saveClockPosition() {
+        const position = {
+            left: clockElement.style.left,
+            top: clockElement.style.top
+        };
+        chrome.storage.local.set({ clockPosition: position }, function () {
+            console.log("Clock position saved:", position);
+        });
+    }
     function updateClockFontSizeLabel() {
         const fontSizeSlider = document.getElementById('ClockFontSize');
         const ClockfontSizeLabel = document.getElementById('ClockfontSizeLabel');
@@ -459,18 +532,26 @@ document.addEventListener("DOMContentLoaded", function () {
         clockElement.style.fontSize = `${fontSizeSlider.value}px`; // Apply the font size to the Clock element
     }
 
-    function removeElementDraggable(element) {
-        // Remove the event listeners for dragging
-        document.removeEventListener("mousemove", element._onMouseMove);
-        document.removeEventListener("mouseup", element._onMouseUp);
-        element.removeEventListener("mousedown", element._onMouseDown);
+    function toggleClockSettings(enable) {
+        const clockSettingsInputs = [
+            timeFormatInput,
+            fontTypeInput,
+            fontColorInput,
+            ClockFontSizeInput,
+            clockPositionInput,
+            showSecondsInput,
+            clockdragButton
+        ];
 
-        // Reset the saved handlers
-        delete element._onMouseMove;
-        delete element._onMouseUp;
-        delete element._onMouseDown;
+        clockSettingsInputs.forEach(input => {
+            input.disabled = !enable;
+            if (input.type === 'color' || input.type === 'range') {
+                input.style.opacity = enable ? 1 : 0.5; // Adjust opacity for visual feedback
+            } else {
+                input.style.opacity = enable ? 1 : 0.5;
+            }
+        });
     }
-
     // ==================== Day Functions ====================
     function updateDay() {
         const now = new Date();
@@ -515,23 +596,68 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function updateDayPosition(position) {
         dayElement.classList.remove("day-top-left", "day-top-right", "day-bottom-left", "day-bottom-right", "day-center", "free");
-        dayElement.classList.add(position);
 
-        if (position === "free") {
-            makeElementDraggable(dayElement, 'dayPosition');
-        } else {
-            dayElement.style.position = 'absolute'; // Ensure position is absolute for other positions
+        if (position !== "free") {
+            // Reset the day's position to the default for the selected position
             dayElement.style.left = '';
             dayElement.style.top = '';
+            dayElement.style.position = '';
+            removeElementDraggable(dayElement); // Disable dragging
+            dayDragButton.style.display = 'none'; // Hide the drag button
+        } else {
+            dayElement.classList.add("free");
+            dayDragButton.style.display = 'inline-block'; // Show the drag button
+        }
+
+        // Apply the selected position
+        dayElement.classList.add(position);
+
+        // Retrieve the last saved position from chrome storage (only for "free" position)
+        if (position === "free") {
+            chrome.storage.local.get(['dayPosition'], function (data) {
+                if (data.dayPosition) {
+                    dayElement.style.left = data.dayPosition.left;
+                    dayElement.style.top = data.dayPosition.top;
+                    dayElement.style.position = 'absolute';
+                }
+            });
         }
     }
-
+    function saveDayPosition() {
+        const position = {
+            left: dayElement.style.left,
+            top: dayElement.style.top
+        };
+        chrome.storage.local.set({ dayPosition: position }, function () {
+            console.log("Day position saved:", position);
+        });
+    }
     function updatedayFontSizeLabel() {
         const fontSizeSlider = document.getElementById('dayFontSize');
         const dayfontSizeLabel = document.getElementById('dayfontSizeLabel');
 
         dayfontSizeLabel.textContent = fontSizeSlider.value; // Update the label with the slider's value
         dayElement.style.fontSize = `${fontSizeSlider.value}px`; // Apply the font size to the day element
+    }
+
+    function toggleDaySettings(enable) {
+        const daySettingsInputs = [
+            dayStyleInput,
+            dayFontTypeInput,
+            dayFontColorInput,
+            dayFontSizeInput,
+            dayPositionInput,
+            dayDragButton
+        ];
+
+        daySettingsInputs.forEach(input => {
+            input.disabled = !enable;
+            if (input.type === 'color' || input.type === 'range') {
+                input.style.opacity = enable ? 1 : 0.5; // Adjust opacity for visual feedback
+            } else {
+                input.style.opacity = enable ? 1 : 0.5;
+            }
+        });
     }
 
     // ==================== Date Functions ====================
@@ -618,15 +744,42 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function updateDatePosition(position) {
         dateElement.classList.remove("d-top-left", "d-top-right", "d-bottom-left", "d-bottom-right", "d-center", "free");
-        dateElement.classList.add(position);
 
-        if (position === "free") {
-            makeElementDraggable(dateElement, 'datePosition');
-        } else {
-            dateElement.style.position = '';
+        if (position !== "free") {
+            // Reset the date's position to the default for the selected position
             dateElement.style.left = '';
             dateElement.style.top = '';
+            dateElement.style.position = '';
+            removeElementDraggable(dateElement); // Disable dragging
+            dateDragButton.style.display = 'none'; // Hide the drag button
+        } else {
+            dateElement.classList.add("free");
+            dateDragButton.style.display = 'inline-block'; // Show the drag button
         }
+
+        // Apply the selected position
+        dateElement.classList.add(position);
+
+        // Retrieve the last saved position from chrome storage (only for "free" position)
+        if (position === "free") {
+            chrome.storage.local.get(['datePosition'], function (data) {
+                if (data.datePosition) {
+                    dateElement.style.left = data.datePosition.left;
+                    dateElement.style.top = data.datePosition.top;
+                    dateElement.style.position = 'absolute';
+                }
+            });
+        }
+    }
+
+    function saveDatePosition() {
+        const position = {
+            left: dateElement.style.left,
+            top: dateElement.style.top
+        };
+        chrome.storage.local.set({ datePosition: position }, function () {
+            console.log("Date position saved:", position);
+        });
     }
 
     function updatedateFontSizeLabel() {
@@ -637,64 +790,213 @@ document.addEventListener("DOMContentLoaded", function () {
         dateElement.style.fontSize = `${fontSizeSlider.value}px`; // Apply the font size to the date element
     }
 
+    function toggleDateSettings(enable) {
+        const dateSettingsInputs = [
+            dateFormatInput,
+            dateFontTypeInput,
+            dateFontColorInput,
+            dateFontSizeInput,
+            datePositionInput,
+            showYearInput,
+            yearFormatInput,
+            dateDragButton
+        ];
+
+        dateSettingsInputs.forEach(input => {
+            input.disabled = !enable;
+            if (input.type === 'color' || input.type === 'range') {
+                input.style.opacity = enable ? 1 : 0.5; // Adjust opacity for visual feedback
+            } else {
+                input.style.opacity = enable ? 1 : 0.5;
+            }
+        });
+    }
+
+    // ==================== Site Functions ====================
+    // Function to update widget position
+    function updateFavoriteSitesPosition(position) {
+        favoriteSitesElement.classList.remove("top-left", "top-right", "bottom-left", "bottom-right", "center", "free");
+
+        if (position !== "free") {
+            favoriteSitesElement.style.left = '';
+            favoriteSitesElement.style.top = '';
+            favoriteSitesElement.style.position = '';
+            removeElementDraggable(favoriteSitesElement);
+            siteDragButton.style.display = 'none'; // Hide the drag button
+        } else {
+            dateElement.classList.add("free");
+            siteDragButton.style.display = 'inline-block'; // Show the drag button
+        }
+
+        favoriteSitesElement.classList.add(position);
+
+        if (position === "free") {
+            // Retrieve the last saved position from chrome storage
+            chrome.storage.local.get(['favoriteSitesPosition'], function (data) {
+                if (data.favoriteSitesPosition) {
+                    favoriteSitesElement.style.left = data.favoriteSitesPosition.left;
+                    favoriteSitesElement.style.top = data.favoriteSitesPosition.top;
+                    favoriteSitesElement.style.position = 'absolute';
+                }
+            });
+        }
+    }
+
+    function saveSitePosition() {
+        const position = {
+            left: favoriteSitesElement.style.left,
+            top: favoriteSitesElement.style.top
+        };
+        chrome.storage.local.set({ favoriteSitesPosition: position }, function () {
+            console.log("Site position saved:", position);
+        });
+    }
+
+    // Function to apply widget settings
+    function applyFavoriteSitesSettings(settings) {
+        showFavoriteSitesInput.checked = settings.showFavoriteSites !== undefined ? settings.showFavoriteSites : true;
+        favoriteSitesSourceInput.value = settings.source || "most-viewed";
+        favoriteSitesPositionInput.value = settings.position || "top-left";
+
+        // Show or hide widget
+        favoriteSitesElement.style.display = showFavoriteSitesInput.checked ? 'block' : 'none';
+
+        // Update widget position
+        updateFavoriteSitesPosition(favoriteSitesPositionInput.value);
+
+        // Load favorite sites based on source
+        loadFavoriteSites(settings.source);
+    }
+
+    // Function to load favorite sites
+    function loadFavoriteSites(source) {
+        favoriteSitesElement.innerHTML = ''; // Clear the widget content
+
+        if (source === "most-viewed") {
+            // Load most viewed sites (you can use Chrome's history API or a predefined list)
+            const mostViewedSites = [
+                { name: "Google", url: "https://www.google.com" },
+                { name: "YouTube", url: "https://www.youtube.com" },
+                { name: "GitHub", url: "https://www.github.com" }
+            ];
+            renderFavoriteSites(mostViewedSites);
+        } else if (source === "user-custom") {
+            // Load user-custom sites from storage
+            chrome.storage.local.get(['favoriteSitesSettings'], function (data) {
+                const customSites = data.favoriteSitesSettings?.customSites || [];
+                renderFavoriteSites(customSites);
+            });
+        }
+    }
+
+    // Function to render favorite sites
+    function renderFavoriteSites(sites) {
+        const ul = document.createElement('ul');
+        sites.forEach(site => {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = site.url;
+            a.textContent = site.name;
+            a.target = "_blank"; // Open in new tab
+            li.appendChild(a);
+            ul.appendChild(li);
+        });
+        favoriteSitesElement.appendChild(ul);
+    }
+
+    // Save widget settings on change
+    [showFavoriteSitesInput, favoriteSitesSourceInput, favoriteSitesPositionInput].forEach(input => {
+        input.addEventListener("change", function () {
+            const favoriteSitesSettings = {
+                showFavoriteSites: showFavoriteSitesInput.checked,
+                source: favoriteSitesSourceInput.value,
+                position: favoriteSitesPositionInput.value,
+                customSites: [] // You can add logic to manage custom sites
+            };
+            chrome.storage.local.set({ favoriteSitesSettings: favoriteSitesSettings }, function () {
+                console.log("Favorite Sites settings saved.");
+            });
+            applyFavoriteSitesSettings(favoriteSitesSettings);
+        });
+    });
+
+    function toggleFavoriteSitesSettings(enable) {
+        const favoriteSitesSettingsInputs = [
+            favoriteSitesSourceInput,
+            favoriteSitesPositionInput,
+            siteDragButton
+        ];
+
+        favoriteSitesSettingsInputs.forEach(input => {
+            input.disabled = !enable;
+            if (input.type === 'color' || input.type === 'range') {
+                input.style.opacity = enable ? 1 : 0.5; // Adjust opacity for visual feedback
+            } else {
+                input.style.opacity = enable ? 1 : 0.5;
+            }
+        });
+    }
+
     // ==================== Initialization ====================
 
-        // Initialize settings and apply random animation
-        syncSettingsMenu();
-        applyRandomAnimation();
+    // Initialize settings and apply random animation
+    syncSettingsMenu();
+    applyRandomAnimation();
+    updateHint();
+    applyFavoriteSitesSettings(defaultSettings.favoriteSitesSettings);
 
-        // Load saved settings and apply them
-        chrome.storage.local.get(
-            ["backgroundKey", "clockSettings", "daySettings", "dateSettings", "muteBackground", "backgroundBlur"],
-            function (data) {
-                // Apply background
-                if (data.backgroundKey) {
-                    getFileFromIndexedDB(data.backgroundKey, function (error, file) {
-                        if (error) {
-                            console.error("Error retrieving file from IndexedDB:", error);
-                            applyBackground(defaultSettings.background); // Fallback to default
-                            return;
-                        }
-                        applyBackground(file); // Apply the background from IndexedDB
-                    });
-                } else {
-                    applyBackground(defaultSettings.background); // Fallback to default
-                }
-
-                // Apply background blur
-                const blurValue = data.backgroundBlur !== undefined ? data.backgroundBlur : defaultSettings.backgroundBlur;
-                backgroundBlurInput.value = blurValue; // Set the slider value
-                updateBackgroundBlur(blurValue); // Apply initial blur
-
-                // Apply clock settings
-                if (data.clockSettings) {
-                    applyClockSettings(data.clockSettings);
-                } else {
-                    applyClockSettings(defaultSettings.clockSettings); // Use default clock settings
-                }
-
-                // Apply day settings
-                if (data.daySettings) {
-                    applyDaySettings(data.daySettings);
-                } else {
-                    applyDaySettings(defaultSettings.daySettings); // Use default day settings
-                }
-
-                // Apply date settings
-                if (data.dateSettings) {
-                    applyDateSettings(data.dateSettings);
-                } else {
-                    applyDateSettings(defaultSettings.dateSettings); // Use default date settings
-                }
-
-                // Apply mute setting
-                if (data.muteBackground !== undefined) {
-                    toggleBackgroundSound(data.muteBackground);
-                } else {
-                    toggleBackgroundSound(defaultSettings.muteBackground); // Use default mute setting
-                }
+    // Load saved settings and apply them
+    chrome.storage.local.get(
+        ["backgroundKey", "clockSettings", "daySettings", "dateSettings", "muteBackground", "backgroundBlur"],
+        function (data) {
+            // Apply background
+            if (data.backgroundKey) {
+                getFileFromIndexedDB(data.backgroundKey, function (error, file) {
+                    if (error) {
+                        console.error("Error retrieving file from IndexedDB:", error);
+                        applyBackground(defaultSettings.background); // Fallback to default
+                        return;
+                    }
+                    applyBackground(file); // Apply the background from IndexedDB
+                });
+            } else {
+                applyBackground(defaultSettings.background); // Fallback to default
             }
-        );
+
+            // Apply background blur
+            const blurValue = data.backgroundBlur !== undefined ? data.backgroundBlur : defaultSettings.backgroundBlur;
+            backgroundBlurInput.value = blurValue; // Set the slider value
+            updateBackgroundBlur(blurValue); // Apply initial blur
+
+            // Apply clock settings
+            if (data.clockSettings) {
+                applyClockSettings(data.clockSettings);
+            } else {
+                applyClockSettings(defaultSettings.clockSettings); // Use default clock settings
+            }
+
+            // Apply day settings
+            if (data.daySettings) {
+                applyDaySettings(data.daySettings);
+            } else {
+                applyDaySettings(defaultSettings.daySettings); // Use default day settings
+            }
+
+            // Apply date settings
+            if (data.dateSettings) {
+                applyDateSettings(data.dateSettings);
+            } else {
+                applyDateSettings(defaultSettings.dateSettings); // Use default date settings
+            }
+
+            // Apply mute setting
+            if (data.muteBackground !== undefined) {
+                toggleBackgroundSound(data.muteBackground);
+            } else {
+                toggleBackgroundSound(defaultSettings.muteBackground); // Use default mute setting
+            }
+        }
+    );
 
 
     // ==================== Event Listeners ====================
@@ -714,11 +1016,152 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    clockdragButton.addEventListener('click', function () {
+        if (isClockDraggingEnabled) {
+            // Save the position and disable dragging
+            clockdragButton.textContent = 'Drag';
+            isClockDraggingEnabled = false;
+            removeElementDraggable(clockElement); // Disable dragging
+            saveClockPosition(); // Save the current position
+        } else {
+            // Enable dragging
+            clockdragButton.textContent = 'Save';
+            isClockDraggingEnabled = true;
+            makeElementDraggable(clockElement, 'clockPosition', isClockDraggingEnabled); // Enable dragging
+        }
+    });
+    // Day Drag Button
+    dayDragButton.addEventListener('click', function () {
+        if (isDayDraggingEnabled) {
+            // Save the position and disable dragging
+            dayDragButton.textContent = 'Drag';
+            isDayDraggingEnabled = false;
+            removeElementDraggable(dayElement); // Disable dragging
+            saveDayPosition(); // Save the current position
+        } else {
+            // Enable dragging
+            dayDragButton.textContent = 'Save';
+            isDayDraggingEnabled = true;
+            makeElementDraggable(dayElement, 'dayPosition', isDayDraggingEnabled); // Enable dragging
+        }
+    });
+
+    // Date Drag Button
+    dateDragButton.addEventListener('click', function () {
+        if (isDateDraggingEnabled) {
+            // Save the position and disable dragging
+            dateDragButton.textContent = 'Drag';
+            isDateDraggingEnabled = false;
+            removeElementDraggable(dateElement); // Disable dragging
+            saveDatePosition(); // Save the current position
+        } else {
+            // Enable dragging
+            dateDragButton.textContent = 'Save';
+            isDateDraggingEnabled = true;
+            makeElementDraggable(dateElement, 'datePosition', isDateDraggingEnabled); // Enable dragging
+        }
+    });
+    // site Drag Button
+    siteDragButton.addEventListener('click', function () {
+        if (isSiteDraggingEnabled) {
+            // Save the position and disable dragging
+            siteDragButton.textContent = 'Drag';
+            isSiteDraggingEnabled = false;
+            removeElementDraggable(favoriteSitesElement); // Disable dragging
+            saveSitePosition(); // Save the current position
+        } else {
+            // Enable dragging
+            siteDragButton.textContent = 'Save';
+            isSiteDraggingEnabled = true;
+            makeElementDraggable(favoriteSitesElement, 'favoriteSitesPosition', isSiteDraggingEnabled); // Enable dragging
+        }
+    });
+    showClockInput.addEventListener("change", function () {
+        const isClockVisible = showClockInput.checked;
+        clockElement.style.display = isClockVisible ? 'block' : 'none';
+
+        // Enable or disable clock settings based on visibility
+        toggleClockSettings(isClockVisible);
+
+        // Save the clock visibility in chrome storage
+        const clockSettings = {
+            showClock: isClockVisible,
+            format: timeFormatInput.value,
+            fontType: fontTypeInput.value,
+            color: fontColorInput.value,
+            size: ClockFontSizeInput.value,
+            position: clockPositionInput.value,
+            showSeconds: showSecondsInput.checked
+        };
+        chrome.storage.local.set({ clockSettings: clockSettings }, function () {
+            console.log("Clock settings updated.");
+        });
+    });
+    showDayInput.addEventListener("change", function () {
+        const isDayVisible = showDayInput.checked;
+        dayElement.style.display = isDayVisible ? 'block' : 'none';
+
+        // Enable or disable day settings based on visibility
+        toggleDaySettings(isDayVisible);
+
+        // Save the day visibility in chrome storage
+        const daySettings = {
+            showDay: isDayVisible,
+            style: dayStyleInput.value,
+            fontType: dayFontTypeInput.value,
+            color: dayFontColorInput.value,
+            size: dayFontSizeInput.value,
+            position: dayPositionInput.value
+        };
+        chrome.storage.local.set({ daySettings: daySettings }, function () {
+            console.log("Day settings updated.");
+        });
+    });
+
+    showDateInput.addEventListener("change", function () {
+        const isDateVisible = showDateInput.checked;
+        dateElement.style.display = isDateVisible ? 'block' : 'none';
+
+        // Enable or disable date settings based on visibility
+        toggleDateSettings(isDateVisible);
+
+        // Save the date visibility in chrome storage
+        const dateSettings = {
+            showDate: isDateVisible,
+            format: dateFormatInput.value,
+            fontType: dateFontTypeInput.value,
+            color: dateFontColorInput.value,
+            size: dateFontSizeInput.value,
+            position: datePositionInput.value,
+            showYear: showYearInput.checked,
+            yearFormat: yearFormatInput.value
+        };
+        chrome.storage.local.set({ dateSettings: dateSettings }, function () {
+            console.log("Date settings updated.");
+        });
+    });
+    showFavoriteSitesInput.addEventListener("change", function () {
+        const isFavoriteSitesVisible = showFavoriteSitesInput.checked;
+        favoriteSitesElement.style.display = isFavoriteSitesVisible ? 'block' : 'none';
+
+        // Enable or disable favorite sites settings based on visibility
+        toggleFavoriteSitesSettings(isFavoriteSitesVisible);
+
+        // Save the favorite sites visibility in chrome storage
+        const favoriteSitesSettings = {
+            showFavoriteSites: isFavoriteSitesVisible,
+            source: favoriteSitesSourceInput.value,
+            position: favoriteSitesPositionInput.value
+        };
+        chrome.storage.local.set({ favoriteSitesSettings: favoriteSitesSettings }, function () {
+            console.log("Favorite Sites settings updated.");
+        });
+    });
     // Handle background selection
     backgroundInput.addEventListener("change", function (event) {
         const file = event.target.files[0];
-        if (file.size > 200 * 1024 * 1024) {
-            alert("Background file must be under 200MB.");
+        if (file.size > 500 * 1024 * 1024) {
+            alert("Background file must be under 500MB.");
             return;
         }
 
@@ -787,10 +1230,9 @@ document.addEventListener("DOMContentLoaded", function () {
             reader.readAsDataURL(file);
         }
     });
-
-    // Mute/Unmute background sound based on user input
-    muteBackgroundInput.addEventListener("change", function () {
-        const isMuted = muteBackgroundInput.checked;
+    muteCheckbox.addEventListener('change', updateHint);
+    document.getElementById('muteBackground').addEventListener('change', function () {
+        const isMuted = this.checked;
         toggleBackgroundSound(isMuted);
 
         // Save mute setting in Chrome storage
@@ -798,6 +1240,7 @@ document.addEventListener("DOMContentLoaded", function () {
             console.log("Mute background sound setting saved:", isMuted);
         });
     });
+
 
     // Handle background blur
     backgroundBlurInput.addEventListener('input', function () {
@@ -830,26 +1273,63 @@ document.addEventListener("DOMContentLoaded", function () {
         clockToggle.classList.toggle("rotated"); // Add or remove 'rotated' class to rotate arrow
     });
 
+    favoriteSitesHeader.addEventListener("click", () => {
+        favoriteSitesSettings.style.display = favoriteSitesSettings.style.display === "block" ? "none" : "block";
+        favoriteSitesToggle.classList.toggle("rotated"); // Add or remove 'rotated' class to rotate arrow
+    });
+
+    // Toggle widget visibility
+    showFavoriteSitesInput.addEventListener("change", function () {
+        favoriteSitesElement.style.display = showFavoriteSitesInput.checked ? 'block' : 'none';
+    });
+
+    // Update widget position
+    favoriteSitesPositionInput.addEventListener("change", function () {
+        updateFavoriteSitesPosition(favoriteSitesPositionInput.value);
+    });
+
+    // Update widget source
+    favoriteSitesSourceInput.addEventListener("change", function () {
+        loadFavoriteSites(favoriteSitesSourceInput.value);
+    });
+
     // ==================== Initial State ====================
     // Show or hide clock, date, and day settings based on saved state
-    chrome.storage.local.get(["clockSettings", "dateSettings", "daySettings"], function (data) {
+    chrome.storage.local.get(["clockSettings", "dateSettings", "daySettings", "favoriteSitesSettings"], function (data) {
         if (data.clockSettings && !data.clockSettings.showClock) {
             clockSettingsGroup.style.display = 'none';
             clockElement.style.display = 'none';
             showClockInput.checked = false;
+            const isClockVisible = data.clockSettings.showClock;
+            showClockInput.checked = isClockVisible;
+            clockElement.style.display = isClockVisible ? 'block' : 'none';
+            toggleClockSettings(isClockVisible); // Enable/disable settings based on visibility
         }
         if (data.dateSettings && !data.dateSettings.showDate) {
             dateSettingsGroup.style.display = 'none';
             dateElement.style.display = 'none';
             showDateInput.checked = false;
+            const isDayVisible = data.daySettings.showDay;
+            showDayInput.checked = isDayVisible;
+            dayElement.style.display = isDayVisible ? 'block' : 'none';
+            toggleDaySettings(isDayVisible); // Enable/disable settings based on visibility
         }
         if (data.daySettings && !data.daySettings.showDay) {
             daySettings.style.display = 'none';
             dayElement.style.display = 'none';
             showDayInput.checked = false;
+            const isDateVisible = data.dateSettings.showDate;
+            showDateInput.checked = isDateVisible;
+            dateElement.style.display = isDateVisible ? 'block' : 'none';
+            toggleDateSettings(isDateVisible); // Enable/disable settings based on visibility
+        }
+        if (data.favoriteSitesSettings) {
+            const isFavoriteSitesVisible = data.favoriteSitesSettings.showFavoriteSites;
+            showFavoriteSitesInput.checked = isFavoriteSitesVisible;
+            favoriteSitesElement.style.display = isFavoriteSitesVisible ? 'block' : 'none';
+            toggleFavoriteSitesSettings(isFavoriteSitesVisible); // Enable/disable settings based on visibility
         }
     });
-
     // ==================== Clock Event Listeners ====================
     fontColorInput.addEventListener('input', function () {
         clockElement.style.color = fontColorInput.value;

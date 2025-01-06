@@ -1,0 +1,110 @@
+/* Clock Positions */
+.top-left {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: block; /* Ensure the element is visible */
+}
+
+.top-right {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: block;
+}
+
+.bottom-left {
+    position: absolute;
+    bottom: 70px;
+    left: 20px;
+    display: block;
+}
+
+.bottom-right {
+    position: absolute;
+    bottom: 70px;
+    right: 20px;
+    display: block;
+}
+
+.center {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: block;
+}
+
+/* Date Positions */
+.d-top-left {
+    position: absolute;
+    top: 70px;
+    left: 20px;
+    display: block;
+}
+
+.d-top-right {
+    position: absolute;
+    top: 70px;
+    right: 20px;
+    display: block;
+}
+
+.d-bottom-left {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    display: block;
+}
+
+.d-bottom-right {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    display: block;
+}
+
+.d-center {
+    position: absolute;
+    top: 35%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: block;
+}
+
+/* Day Positions */
+.day-top-left {
+    position: absolute;
+    top: 70px;
+    left: 20px;
+    display: block;
+}
+
+.day-top-right {
+    position: absolute;
+    top: 70px;
+    right: 20px;
+    display: block;
+}
+
+.day-bottom-left {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    display: block;
+}
+
+.day-bottom-right {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    display: block;
+}
+
+.day-center {
+    position: absolute;
+    top: 25%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: block; /* Ensure the element is visible */
+}

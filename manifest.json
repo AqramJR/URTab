@@ -8,7 +8,7 @@
   },
   "permissions": [
     "storage",
-	"unlimitedStorage"
+    "unlimitedStorage"
   ],
   "icons": {
     "128": "assets/icon.png"
