@@ -8,6 +8,25 @@ URTab is a Brave/Chrome browser extension that enhances the new tab experience w
 - Customizable Clock/Date
 - Easy access settings popup
 
+<details>
+  <summary>preview</summary>
+
+
+
+https://github.com/user-attachments/assets/dd773d1b-9d73-4d1e-a746-0ffc286af6eb
+
+
+https://github.com/user-attachments/assets/dfb75b7b-93d0-4d7e-abbb-cbc3eda2d1d6
+  
+
+https://github.com/user-attachments/assets/c990e848-4ec8-475e-8955-7f7fae4d4598
+
+
+</details>
+
+
+
+
 ## TODO List
 
 - ~~Try **IndexedDB** for larger background storage or set a limit of 5MB.~~
