@@ -9,21 +9,19 @@ URTab is a Brave/Chrome browser extension that enhances the new tab experience w
 - Easy access settings popup
 
 <details>
-  <summary>preview</summary>
+  <summary><h2>preview</h2></summary>
 
 
 
-https://github.com/user-attachments/assets/dd773d1b-9d73-4d1e-a746-0ffc286af6eb
+https://github.com/user-attachments/assets/1ca16661-5fbb-4547-8682-2a0e9537c0c3
 
+https://github.com/user-attachments/assets/f95d898b-8683-477d-ba99-7c6e50a5f147
 
-https://github.com/user-attachments/assets/dfb75b7b-93d0-4d7e-abbb-cbc3eda2d1d6
-  
+https://github.com/user-attachments/assets/a556bd91-6944-45a1-abc3-b4243a2d78a1
 
-https://github.com/user-attachments/assets/c990e848-4ec8-475e-8955-7f7fae4d4598
 
 
 </details>
-
 
 
 
