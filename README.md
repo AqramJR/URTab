@@ -59,7 +59,7 @@ URTab is a modern, highly customizable new tab page extension that transforms yo
 
 1. Clone the repository:
 \`\`\`bash
-git clone https://github.com/yourusername/URTab.git
+git clone https://github.com/AqramJR/URTab.git
 \`\`\`
 
 2. Open Chrome/Brave and navigate to:
@@ -96,12 +96,6 @@ git clone https://github.com/yourusername/URTab.git
 - Right-click widgets for quick options
 - Double-click to edit widget settings
 - Use keyboard shortcuts for quick access
-
-## ⌨️ Keyboard Shortcuts
-- `Esc` - Close settings
-- `Ctrl + ,` - Open settings
-- `Ctrl + R` - Reset layout
-- `Ctrl + H` - Toggle sites widget
 
 ## 🔄 Updates
 See [CHANGELOG.md](CHANGELOG.md) for detailed version history and updates.
