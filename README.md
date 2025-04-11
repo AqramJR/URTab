@@ -1,29 +1,129 @@
 # URTab: A Customizable New Tab Page for Brave/Chrome Browser
 
-URTab is a Brave/Chrome browser extension that enhances the new tab experience with customizable animated backgrounds, a live clock, and user-friendly settings.
+URTab is a modern, highly customizable new tab page extension that transforms your browsing experience with a clean, minimalist design and powerful features.
 
-## Features
+![URTab Preview](assets/preview.png)
 
-- Animated Customizable backgrounds (images, GIFs, videos)
-- Customizable Clock/Date
-- Easy access settings popup
+## ✨ Features
 
-<details>
-  <summary><h2>preview</h2></summary>
+### 🎨 Modern UI
+- Glass-morphism design with blur effects
+- Smooth transitions and animations
+- Responsive layout for all devices
+- Dark/Light mode support
+- Custom scrollbar styling
 
+### 🔧 Customization
+- Background customization options
+- Adjustable widget positions
+- Multiple view options for sites
+- Customizable color schemes
+- Flexible layout options
 
+### ⚡ Widgets
+#### Clock & Date
+- Multiple formats
+- Customizable position
+- Optional seconds display
+- 12/24 hour format
 
-https://github.com/user-attachments/assets/1ca16661-5fbb-4547-8682-2a0e9537c0c3
+#### Sites Widget
+- Multiple view options:
+  - Grid view
+  - List view
+  - Compact view
+- Site sources:
+  - Recent sites
+  - Most visited sites
+  - Custom sites
+  - Bookmark folders
+- Visibility options:
+  - Always visible
+  - Hidden
+  - Hover-only
+  - Click-to-show
+- Flexible positioning:
+  - Top-left
+  - Top-right
+  - Bottom-left
+  - Bottom-right
+  - Center
 
-https://github.com/user-attachments/assets/f95d898b-8683-477d-ba99-7c6e50a5f147
+### 🚀 Performance
+- Optimized animations
+- Fast loading times
+- Efficient state management
+- Smooth transitions
 
-https://github.com/user-attachments/assets/a556bd91-6944-45a1-abc3-b4243a2d78a1
+## 🛠️ Installation
 
+1. Clone the repository:
+\`\`\`bash
+git clone https://github.com/yourusername/URTab.git
+\`\`\`
 
+2. Open Chrome/Brave and navigate to:
+   - Chrome: chrome://extensions
+   - Brave: brave://extensions
 
-</details>
+3. Enable "Developer mode"
 
+4. Click "Load unpacked" and select the URTab folder
 
+## 📖 Usage
+
+### Basic Setup
+1. Open a new tab to see URTab in action
+2. Click the settings icon (⚙️) to customize your experience
+3. Choose your preferred background and widgets
+
+### Widget Configuration
+- **Sites Widget**: 
+  - Choose view type (grid/list/compact)
+  - Select site sources
+  - Set visibility options
+  - Adjust position
+  - Customize appearance
+
+- **Clock Widget**:
+  - Select format
+  - Choose position
+  - Adjust size
+  - Set color
+
+### Customization Tips
+- Use drag and drop to position widgets
+- Right-click widgets for quick options
+- Double-click to edit widget settings
+- Use keyboard shortcuts for quick access
+
+## ⌨️ Keyboard Shortcuts
+- `Esc` - Close settings
+- `Ctrl + ,` - Open settings
+- `Ctrl + R` - Reset layout
+- `Ctrl + H` - Toggle sites widget
+
+## 🔄 Updates
+See [CHANGELOG.md](CHANGELOG.md) for detailed version history and updates.
+
+## 🙏 Acknowledgments
+- Icons by [Feather Icons](https://feathericons.com/)
+- Glass-morphism effects inspired by [Glass UI](https://ui.glass/)
+
+## 🐛 Bug Reports
+Create an issue for bug reports
+
+## 🔮 Roadmap
+- Theme customization
+- More widget types
+- Enhanced animations
+- Better mobile support
+- Additional customization options
+- Performance improvements
+- Better accessibility features
+
+---
+Made with ❤️ by AQRAM
 
 ## TODO List
 
@@ -39,5 +139,5 @@ https://github.com/user-attachments/assets/a556bd91-6944-45a1-abc3-b4243a2d78a1
 - ~~Set up the Default settings.~~
 - ~~Increase background limit to 500MB.~~
 - ~~Clean and optimize the code.~~
+- ~~Implement **Weather Widget**.~~
 - [ ] Implement an **Welcome Page**.
-- [ ] Implement **Weather Widget**.

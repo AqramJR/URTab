@@ -1,5 +1,5 @@
 #loadingScreen {
-    position: fixed;
+    position: fixed; /* Cover the entire screen */
     top: 0;
     left: 0;
     width: 100%;
@@ -8,9 +8,15 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
-    transition: opacity 0.5s ease;
+    z-index: 1000; /* Ensure it's on top of everything */
+    opacity: 1; /* Start fully visible */
+    transition: opacity 0.5s ease; /* Smooth fade-out */
 }
+
+    #loadingScreen.hidden {
+        opacity: 0; /* Fade out */
+        pointer-events: none; /* Disable interactions */
+    }
 
 /* Pulse Animation */
 .loader.pulse {

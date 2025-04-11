@@ -1,0 +1,1024 @@
+/* Modern UI Styles */
+:root {
+    --primary-color: #ffffff;
+    --secondary-color: rgba(0, 0, 0, 0.3);
+    --hover-color: rgba(0, 0, 0, 0.4);
+    --text-color: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.85);
+    --text-muted: rgba(255, 255, 255, 0.7);
+    --border-radius: 15px;
+    --transition-speed: 0.3s;
+    --accent-color: #2196F3;
+    --danger-color: #f44336;
+    --success-color: #4CAF50;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Quicksand', sans-serif;
+    overflow: hidden;
+    color: var(--text-color);
+}
+
+/* Background */
+#background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+}
+
+#backgroundContent {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Settings Icon */
+#settingsIcon {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    transition: transform var(--transition-speed);
+    z-index: 1000;
+}
+
+#settingsIcon:hover {
+    transform: rotate(90deg);
+}
+
+/* Settings Popup */
+.popup {
+    display: none;
+    position: fixed;
+    bottom: 70px;  /* Position above the settings icon */
+    right: 20px;   /* Align with settings icon */
+    transform: none;  /* Remove the center transform */
+    background: rgba(0, 0, 0, 0.95);  /* Darker background for better contrast */
+    backdrop-filter: blur(20px);
+    padding: 25px;
+    border-radius: var(--border-radius);
+    width: 350px;    /* Fixed width */
+    max-height: 80vh;
+    overflow-y: auto;
+    z-index: 1001;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    animation: popupSlideUp 0.3s ease-out;
+}
+
+@keyframes popupSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Settings Groups */
+.settings-group {
+    margin-bottom: 20px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.07);
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.settings-group:hover {
+    background: rgba(255, 255, 255, 0.09);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.settings-header {
+    color: var(--text-color);
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-bottom: 15px;
+}
+
+/* Form Elements */
+label {
+    display: block;
+    margin: 10px 0 5px;
+    color: var(--text-color);
+    font-weight: 500;
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
+}
+
+select, input[type="text"], input[type="number"] {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: var(--text-color);
+    padding: 10px 15px;
+    border-radius: 8px;
+    width: 100%;
+    margin: 5px 0;
+    transition: all var(--transition-speed);
+    font-size: 0.9rem;
+}
+
+select option {
+    background: rgba(0, 0, 0, 0.95);
+    color: var(--text-color);
+    padding: 8px;
+}
+
+select:hover, input[type="text"]:hover, input[type="number"]:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+select:focus, input[type="text"]:focus, input[type="number"]:focus {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: var(--accent-color);
+    outline: none;
+}
+
+input[type="range"] {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    outline: none;
+    -webkit-appearance: none;
+    margin: 15px 0;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+input[type="color"] {
+    width: 100%;
+    height: 40px;
+    padding: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    cursor: pointer;
+    background: none;
+}
+
+/* Switch Toggle */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+    margin: 10px 0;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: var(--transition-speed);
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: var(--transition-speed);
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--accent-color);
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+/* Reset Button */
+#resetButton {
+    background-color: var(--danger-color);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    margin-top: 20px;
+    cursor: pointer;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all var(--transition-speed);
+    width: 100%;
+}
+
+#resetButton:hover {
+    background-color: #d32f2f;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .popup {
+        width: 90%;
+        right: 50%;
+        transform: translateX(50%);
+        max-height: 85vh;
+    }
+
+    .settings-group {
+        padding: 15px;
+    }
+
+    .settings-header {
+        padding: 12px;
+    }
+}
+
+/* Scrollbar Styling */
+.popup::-webkit-scrollbar {
+    width: 8px;
+}
+
+.popup::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.popup::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.popup::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Draggable Elements */
+.draggable {
+    position: fixed;
+    cursor: move;
+    user-select: none;
+    transition: transform var(--transition-speed);
+}
+
+.draggable.with-hover:hover {
+    transform: scale(1.01);
+}
+
+/* Loading Screen */
+#loadingScreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+/* Prevent text selection on draggable elements */
+.draggable {
+    user-select: none; /* Disable text selection */
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE/Edge */
+}
+
+body.dragging {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+#backgroundContent {
+    position: absolute;
+    top: -10px; /* Offset to avoid white borders */
+    left: -10px;
+    width: calc(100% + 20px); /* Expand to cover the offset */
+    height: calc(100% + 20px);
+    background-size: cover;
+    background-position: center;
+}
+
+#background {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Prevent blur from affecting edges */
+    background-color: #000; /* Fallback color */
+    z-index: -1; /* Ensure it's behind other elements */
+    transition: filter 0.3s ease; /* Smooth transition for blur changes */
+}
+
+#settingsIcon {
+    display: inline-block;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    opacity: 0.3;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+    #settingsIcon:hover {
+        opacity: 1;
+        animation: rotateSettings 3s linear infinite; /* Rotate continuously at a specified duration */
+    }
+
+@keyframes rotateSettings {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+#settingsPopup {
+    display: none;
+    position: fixed;
+    bottom: 100px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.5); /* Dark transparent background */
+    color: white; /* White text */
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    border-radius: 10px; /* Rounded corners */
+    z-index: 2;
+    backdrop-filter: blur(2px);
+}
+
+#resetButton {
+    background-color: #f44336; /* Red color */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin-top: 20px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+    #resetButton:hover {
+        background-color: #d32f2f; /* Darker red on hover */
+    }
+
+.clock {
+    position: absolute;
+    color: #ffffff;
+    font-size: 40px;
+    font-family: Arial, sans-serif;
+}
+
+.date {
+    position: absolute;
+    color: #ffffff;
+    font-size: 40px;
+    font-family: Arial, sans-serif;
+}
+
+.settings-section {
+    margin-bottom: 20px;
+}
+
+.settings-header {
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+    padding: 10px;
+    background-color: #333;
+    color: white;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+    .settings-header span {
+        display: inline-block;
+    }
+
+.arrow {
+    font-size: 16px;
+}
+
+.settings-group {
+    padding: 10px;
+    display: none; /* Start hidden */
+}
+
+#backgroundSettings, #clockSettings, #dateSettings, #daySettings, #favoriteSitesSettings {
+    padding: 10px;
+}
+
+/* Arrow for the collapsible sections */
+.settings-header span#backgroundToggle,
+.settings-header span#clockToggle,
+.settings-header span#dayToggle,
+.settings-header span#favoriteSitesToggle,
+.settings-header span#dateToggle {
+    transition: transform 1.5s ease; /* Smooth animation */
+}
+
+.settings-header span.rotated {
+    transform: rotate(180deg); /* Rotate the arrow */
+}
+
+/* Custom Toggle Switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 25px;
+    height: 15px;
+}
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 15px;
+}
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 10px;
+        width: 10px;
+        left: 2px;
+        bottom: 2px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+    }
+
+input:checked + .slider {
+    background-color: #2196F3;
+}
+
+    input:checked + .slider:before {
+        transform: translateX(10px);
+    }
+/**/
+/* The switch - the box around the speaker*/
+.toggleSwitch {
+    width: 25px;
+    height: 25px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(39, 39, 39);
+    border-radius: 50%;
+    cursor: pointer;
+    transition-duration: .3s;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.13);
+    overflow: hidden;
+}
+
+#muteBackground {
+    display: none;
+}
+
+.bell {
+    width: 18px;
+}
+
+    .bell path {
+        fill: white;
+    }
+
+.speaker {
+    width: 50%;
+    height: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    transition-duration: .3s;
+}
+
+    .speaker svg {
+        width: 18px;
+    }
+
+.mute-speaker {
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    z-index: 3;
+    transition-duration: .3s;
+}
+
+    .mute-speaker svg {
+        width: 18px;
+    }
+
+#muteBackground:checked + .toggleSwitch .speaker {
+    opacity: 0;
+    transition-duration: .3s;
+}
+
+#muteBackground:checked + .toggleSwitch .mute-speaker {
+    opacity: 1;
+    transition-duration: .3s;
+}
+
+#muteBackground:active + .toggleSwitch {
+    transform: scale(0.7);
+}
+
+#muteBackground:hover + .toggleSwitch {
+    background-color: rgb(61, 61, 61);
+}
+/* ------------------------------------------------------------------- */
+
+/* Container for the mute toggle and hint */
+.mute-container {
+    position: relative;
+    display: inline-block;
+}
+
+/* Hint (Tooltip) */
+.hint {
+    visibility: hidden;
+    width: 120px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%; /* Position above the toggle switch */
+    left: 50%;
+    margin-left: -60px; /* Center the hint */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Show the hint on hover */
+.mute-container:hover .hint {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Sites Widget Styles */
+#sites {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 15px;
+    max-width: 300px;
+    max-height: 500px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    resize: both;
+    opacity: 1;
+    visibility: visible;
+}
+
+#sites.hidden {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    pointer-events: none;
+}
+
+#sites.hover-only {
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#sites.hover-only:hover {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Sites Widget Hover Area */
+.sites-hover-area {
+    position: fixed;
+    width: 100px;
+    height: 100px;
+    opacity: 0;
+}
+
+.sites-hover-area:hover + #sites.hover-only {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Sites Widget States */
+#sites.click-to-show {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    pointer-events: none;
+}
+
+#sites.click-to-show.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+/* Sites Toggle Button */
+.sites-toggle {
+    position: fixed;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+.sites-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.sites-toggle svg {
+    width: 20px;
+    height: 20px;
+    fill: var(--text-color);
+    transition: transform 0.3s ease;
+}
+
+.sites-toggle.active svg {
+    transform: rotate(45deg);
+}
+
+/* Sites Widget Animation States */
+@keyframes sitesFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes sitesFadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+}
+
+#sites.fade-in {
+    animation: sitesFadeIn 0.3s ease forwards;
+}
+
+#sites.fade-out {
+    animation: sitesFadeOut 0.3s ease forwards;
+}
+
+/* Sites Widget Position States */
+#sites[data-position="top-left"] {
+    top: 20px;
+    left: 20px;
+}
+
+#sites[data-position="top-right"] {
+    top: 20px;
+    right: 20px;
+}
+
+#sites[data-position="bottom-left"] {
+    bottom: 20px;
+    left: 20px;
+}
+
+#sites[data-position="bottom-right"] {
+    bottom: 20px;
+    right: 20px;
+}
+
+#sites[data-position="center"] {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Modern Scrollbar for Sites Widget */
+#sites::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+#sites::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+    margin: 3px;
+}
+
+#sites::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+    transition: background 0.3s ease;
+}
+
+#sites::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+#sites::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* Site Items Styling */
+.site-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    margin: 4px 0;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--text-color);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.site-item:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.site-item .site-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+}
+
+.site-item:hover .site-icon {
+    transform: scale(1.1);
+}
+
+.site-item .site-title {
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: rgba(255, 255, 255, 0.9);
+    flex: 1;
+}
+
+/* Folder Styling */
+.site-item.folder {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+    padding-right: 35px;
+}
+
+.site-item.folder::after {
+    content: '›';
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    opacity: 0.7;
+    transition: all 0.3s ease;
+}
+
+.site-item.folder:hover::after {
+    opacity: 1;
+    transform: translateY(-50%) translateX(3px);
+}
+
+.site-item.folder[data-state="open"]::after {
+    transform: translateY(-50%) rotate(90deg);
+}
+
+/* Back Button Styling */
+.site-item.back-button {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: 10px;
+}
+
+.site-item.back-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.site-item.back-button .site-icon {
+    transform: scale(0.9);
+}
+
+.site-item.back-button:hover .site-icon {
+    transform: scale(1) translateX(-3px);
+}
+
+/* Grid View */
+.sites.grid-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 10px;
+    padding: 15px;
+}
+
+.grid-view .site-item {
+    flex-direction: column;
+    text-align: center;
+    height: 80px;
+    padding: 10px;
+    justify-content: center;
+}
+
+.grid-view .site-item .site-icon {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 8px;
+}
+
+.grid-view .site-item .site-title {
+    font-size: 12px;
+    text-align: center;
+    max-width: 100%;
+    line-height: 1.2;
+}
+
+/* Compact View */
+.sites.compact-view .site-item {
+    padding: 6px 10px;
+    margin: 2px 0;
+}
+
+.sites.compact-view .site-item .site-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.sites.compact-view .site-item .site-title {
+    font-size: 12px;
+}
+
+/* Custom Sites List */
+.custom-site-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    margin-bottom: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.custom-site-item input {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: var(--text-color);
+    font-size: 13px;
+    flex: 1;
+}
+
+.custom-site-item input:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.custom-site-delete {
+    background: rgba(255, 0, 0, 0.2);
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.custom-site-delete:hover {
+    background: rgba(255, 0, 0, 0.3);
+    transform: scale(1.1);
+}
+
+/* Add Site Button */
+#addCustomSite {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-color);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 8px 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+#addCustomSite:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Loading State */
+.sites-loading {
+    text-align: center;
+    padding: 20px;
+    color: rgba(255, 255, 255, 0.7);
+    font-style: italic;
+}
+
+/* Empty State */
+.sites-empty {
+    text-align: center;
+    padding: 30px 20px;
+    color: rgba(255, 255, 255, 0.5);
+    font-style: italic;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    margin: 10px 0;
+}

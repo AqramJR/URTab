@@ -8,7 +8,11 @@
   },
   "permissions": [
     "storage",
-    "unlimitedStorage"
+    "unlimitedStorage",
+    "geolocation",
+    "bookmarks",
+    "history",
+    "topSites"
   ],
   "icons": {
     "128": "assets/icon.png"

@@ -4,10 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <link rel="stylesheet" type="text/css" href="fonts.css">
-    <link rel="stylesheet" type="text/css" href="loading.css">
-    <link rel="stylesheet" type="text/css" href="positions.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="css/fonts.css">
+    <link rel="stylesheet" type="text/css" href="css/loading.css">
+    <link rel="stylesheet" type="text/css" href="css/positions.css">
+    <link rel="stylesheet" type="text/css" href="css/weather.css">
     <title>Custom New Tab</title>
 </head>
 
@@ -20,6 +21,16 @@
     <div id="day" class="day draggable"></div>
     <div id="date" class="date draggable"></div>
     <div id="favoriteSites" class="favorite-sites draggable"></div>
+    <div id="weather" class="weather draggable">
+        <div class="weather-content">
+            <div class="weather-icon"></div>
+            <div class="weather-info">
+                <div class="temperature"></div>
+                <div class="description"></div>
+                <div class="location"></div>
+            </div>
+        </div>
+    </div>
 
     <img id="settingsIcon" src="assets/settingsicon.png" alt="Settings" />
 
@@ -268,39 +279,150 @@
             <button id="dateDragButton" style="display: none;">Drag</button><br><br>
         </div><br>
 
-        <!-- Favorite Sites Widget Settings -->
-        <div id="favoriteSitesHeader" class="settings-header">
-            <span>Sites</span>
-            <span id="favoriteSitesToggle">▼</span>
+        <!-- Weather Settings Section -->
+        <div id="weatherHeader" class="settings-header">
+            <span>Weather</span>
+            <span id="weatherToggle">▼</span>
         </div>
-        <div id="favoriteSitesSettings" class="settings-group">
-		
-		    <label for="showFavoriteSites">Show Sites Widget</label>
-            <label for="showFavoriteSites" class="switch">
-                <input type="checkbox" id="showFavoriteSites" checked>
+        <div id="weatherSettings" class="settings-group">
+            <label for="showWeather">Show Weather</label>
+            <label for="showWeather" class="switch">
+                <input type="checkbox" id="showWeather" checked>
                 <span class="slider"></span>
             </label><br><br>
 
-
-            <label for="favoriteSitesSource">Sites Source:</label>
-            <select id="favoriteSitesSource">
-                <option value="most-viewed">Default</option>
-                <option value="user-custom">Custom "Soon"</option>
+            <label for="weatherUnit">Temperature Unit:</label>
+            <select id="weatherUnit">
+                <option value="metric">Celsius (°C)</option>
+                <option value="imperial">Fahrenheit (°F)</option>
             </select><br><br>
-            <label for="favoriteSitesPosition">Position:</label>
-            <select id="favoriteSitesPosition">
+
+            <label for="weatherFontType">Weather Font Type:</label>
+            <select id="weatherFontType">
+                <option value="Quicksand">Quicksand</option>
+                <option value="Arial">Arial</option>
+                <option value="Ubuntu">Ubuntu</option>
+                <option value="Play">Play</option>
+            </select><br><br>
+
+            <label for="weatherFontColor">Weather Font Color:</label>
+            <input type="color" id="weatherFontColor" value="#ffffff"><br><br>
+
+            <label for="weatherFontSize">Weather Font Size:</label>
+            <input type="range" id="weatherFontSize" min="20" max="100" value="40" step="5">
+            <span id="weatherFontSizeLabel">40</span>px<br><br>
+
+            <label for="weatherPosition">Weather Position:</label>
+            <select id="weatherPosition">
+                <option value="top-left">Top Left</option>
+                <option value="top-right">Top Right</option>
+                <option value="center">Center</option>
+                <option value="bottom-left">Bottom Left</option>
+                <option value="bottom-right">Bottom Right</option>
+                <option value="free">Custom</option>
+            </select>
+            <button id="weatherDragButton" style="display: none;">Drag</button><br><br>
+        </div><br>
+
+        <!-- Hover Effects Settings Section -->
+        <div id="hoverEffectsHeader" class="settings-header">
+            <span>Hover Effects</span>
+            <span id="hoverEffectsToggle">▼</span>
+        </div>
+        <div id="hoverEffectsSettings" class="settings-group">
+            <label for="enableHoverEffects">Enable Hover Effects</label>
+            <label for="enableHoverEffects" class="switch">
+                <input type="checkbox" id="enableHoverEffects" checked>
+                <span class="slider"></span>
+            </label><br><br>
+        </div><br>
+
+        <!-- Enhanced Sites Widget Settings -->
+        <div id="sitesHeader" class="settings-header">
+            <span>Sites</span>
+            <span id="sitesToggle">▼</span>
+        </div>
+        <div id="sitesSettings" class="settings-group">
+            <label for="showSites">Show Sites Widget</label>
+            <label for="showSites" class="switch">
+                <input type="checkbox" id="showSites" checked>
+                <span class="slider"></span>
+            </label><br><br>
+
+            <label for="sitesView">View:</label>
+            <select id="sitesView">
+                <option value="bookmarks">Bookmarks</option>
+                <option value="recent">Recent Sites</option>
+                <option value="most-visited">Most Visited</option>
+                <option value="custom">Custom Sites</option>
+            </select><br><br>
+
+            <div id="bookmarksOptions" class="view-options">
+                <label for="bookmarksFolder">Bookmarks Folder:</label>
+                <select id="bookmarksFolder">
+                    <option value="bookmarks_bar">Bookmarks Bar</option>
+                    <option value="other">Other Bookmarks</option>
+                    <option value="mobile">Mobile Bookmarks</option>
+                </select><br><br>
+            </div>
+
+            <div id="recentOptions" class="view-options">
+                <label for="recentTimeRange">Time Range:</label>
+                <select id="recentTimeRange">
+                    <option value="today">Today</option>
+                    <option value="week">Last Week</option>
+                    <option value="month">Last Month</option>
+                </select><br><br>
+            </div>
+
+            <div id="mostVisitedOptions" class="view-options">
+                <label for="mostVisitedCount">Number of Sites:</label>
+                <input type="number" id="mostVisitedCount" min="1" max="20" value="8"><br><br>
+            </div>
+
+            <div id="customOptions" class="view-options">
+                <div id="customSitesList">
+                    <!-- Custom sites will be added here dynamically -->
+                </div>
+                <button id="addCustomSite">Add Site</button><br><br>
+            </div>
+
+            <label for="sitesPosition">Position:</label>
+            <select id="sitesPosition">
                 <option value="top-left">Top Left</option>
                 <option value="top-right">Top Right</option>
                 <option value="bottom-left">Bottom Left</option>
                 <option value="bottom-right">Bottom Right</option>
                 <option value="free">Custom</option>
             </select>
-            <button id="siteDragButton" style="display: none;">Drag</button><br><br>
+            <button id="sitesDragButton" style="display: none;">Drag</button><br><br>
+
+            <label for="sitesStyle">Style:</label>
+            <select id="sitesStyle">
+                <option value="grid">Grid</option>
+                <option value="list">List</option>
+                <option value="compact">Compact</option>
+            </select><br><br>
+
+            <label for="sitesShowIcons">Show Icons:</label>
+            <label for="sitesShowIcons" class="switch">
+                <input type="checkbox" id="sitesShowIcons" checked>
+                <span class="slider"></span>
+            </label><br><br>
+
+            <label for="sitesShowTitles">Show Titles:</label>
+            <label for="sitesShowTitles" class="switch">
+                <input type="checkbox" id="sitesShowTitles" checked>
+                <span class="slider"></span>
+            </label><br><br>
         </div>
 
         <!-- Reset Button -->
         <button id="resetButton">Reset to Defaults</button>
     </div>
+
+    <!-- Sites Widget -->
+    <div id="sites" class="sites"></div>
 
     <script src="newtab.js"></script>
 </body>

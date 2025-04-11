@@ -1,0 +1,77 @@
+.weather {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 15px;
+    color: #ffffff;
+    font-family: 'Quicksand', sans-serif;
+    transition: all 0.3s ease;
+    min-width: 200px;
+}
+
+.weather:hover {
+    background: rgba(0, 0, 0, 0.4);
+    transform: scale(1.02);
+}
+
+.weather-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.weather-icon {
+    width: 50px;
+    height: 50px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.weather-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.temperature {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.description {
+    font-size: 14px;
+    text-transform: capitalize;
+}
+
+.location {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+/* Weather widget positions */
+.weather.top-left {
+    top: 20px;
+    left: 20px;
+}
+
+.weather.top-right {
+    top: 20px;
+    right: 20px;
+}
+
+.weather.center {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.weather.bottom-left {
+    bottom: 20px;
+    left: 20px;
+}
+
+.weather.bottom-right {
+    bottom: 20px;
+    right: 20px;
+} 

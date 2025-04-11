@@ -55,14 +55,45 @@ document.addEventListener("DOMContentLoaded", function () {
     const dateDragButton = document.getElementById('dateDragButton');
     let isDateDraggingEnabled = false;
 
-    // Favorite Sites Widget Elements
-    const favoriteSitesElement = document.getElementById('favoriteSites');
-    const showFavoriteSitesInput = document.getElementById('showFavoriteSites');
-    const favoriteSitesSourceInput = document.getElementById('favoriteSitesSource');
-    const favoriteSitesPositionInput = document.getElementById('favoriteSitesPosition');
-    const siteDragButton = document.getElementById('siteDragButton');
-    let isSiteDraggingEnabled = false; // Track if dragging is enabled for Sites
+    // Sites Widget Elements
+    const sitesElement = document.getElementById('sites');
+    const showSitesInput = document.getElementById('showSites');
+    const sitesViewInput = document.getElementById('sitesView');
+    const sitesPositionInput = document.getElementById('sitesPosition');
+    const sitesStyleInput = document.getElementById('sitesStyle');
+    const sitesShowIconsInput = document.getElementById('sitesShowIcons');
+    const sitesShowTitlesInput = document.getElementById('sitesShowTitles');
+    const sitesDragButton = document.getElementById('sitesDragButton');
+    const bookmarksFolderInput = document.getElementById('bookmarksFolder');
+    const recentTimeRangeInput = document.getElementById('recentTimeRange');
+    const mostVisitedCountInput = document.getElementById('mostVisitedCount');
+    const customSitesList = document.getElementById('customSitesList');
+    const addCustomSiteButton = document.getElementById('addCustomSite');
+    let isSitesDraggingEnabled = false;
 
+    // Add folder navigation state
+    let folderNavigationStack = [];
+    let currentFolderId = '';
+    let folderStates = new Map(); // Track folder open/closed states
+
+    // Function to toggle folder state
+    function toggleFolder(folderId) {
+        const currentState = folderStates.get(folderId) || 'closed';
+        const newState = currentState === 'closed' ? 'open' : 'closed';
+        folderStates.set(folderId, newState);
+        return newState;
+    }
+
+    // Weather Elements
+    const weatherElement = document.getElementById('weather');
+    const showWeatherInput = document.getElementById('showWeather');
+    const weatherUnitInput = document.getElementById('weatherUnit');
+    const weatherFontTypeInput = document.getElementById('weatherFontType');
+    const weatherFontColorInput = document.getElementById('weatherFontColor');
+    const weatherFontSizeInput = document.getElementById('weatherFontSize');
+    const weatherPositionInput = document.getElementById('weatherPosition');
+    const weatherDragButton = document.getElementById('weatherDragButton');
+    let isWeatherDraggingEnabled = false;
 
     // Loading Animations
     const animations = [
@@ -74,6 +105,12 @@ document.addEventListener("DOMContentLoaded", function () {
         "glow",
         "cube"
     ];
+
+    // Hover Effects Elements
+    const enableHoverEffectsInput = document.getElementById('enableHoverEffects');
+    const hoverEffectsSettings = document.getElementById('hoverEffectsSettings');
+    const hoverEffectsToggle = document.getElementById('hoverEffectsToggle');
+    const hoverEffectsHeader = document.getElementById('hoverEffectsHeader');
 
     // Default Settings
     const defaultSettings = {
@@ -115,23 +152,54 @@ document.addEventListener("DOMContentLoaded", function () {
             yearFormat: "full"
         },
 
-        favoriteSitesSettings: {
-            showFavoriteSites: true,
-            source: "most-viewed", // "most-viewed" or "user-custom"
-            position: "top-left",
-            customSites: [] // Array of user-custom sites
-        }
+        sitesSettings: {
+            showSites: true,
+            view: 'bookmarks',
+            position: 'top-left',
+            style: 'grid',
+            showIcons: true,
+            showTitles: true,
+            bookmarksFolder: 'bookmarks_bar',
+            recentTimeRange: 'today',
+            mostVisitedCount: 8,
+            customSites: []
+        },
 
+        // Weather settings
+        weatherSettings: {
+            showWeather: true,
+            unit: "metric",
+            fontType: "Quicksand",
+            color: "#ffffff",
+            size: "40",
+            position: "top-right"
+        },
+
+        // Hover Effects settings
+        hoverEffectsSettings: {
+            enabled: true
+        }
     };
 
-
-
+    // Initialize settings with default values
+    let settings = { ...defaultSettings };
 
     // ==================== Settings Synchronization ====================
     function syncSettingsMenu() {
         chrome.storage.local.get(
-            ["backgroundKey", "clockSettings", "daySettings", "dateSettings", "muteBackground", "backgroundBlur", "favoriteSitesSettings"],
+            ["backgroundKey", "clockSettings", "daySettings", "dateSettings", "muteBackground", "backgroundBlur", "sitesSettings", "weatherSettings", "hoverEffectsSettings"],
             function (data) {
+                // Update settings object with stored values
+                if (data.clockSettings) settings.clockSettings = data.clockSettings;
+                if (data.daySettings) settings.daySettings = data.daySettings;
+                if (data.dateSettings) settings.dateSettings = data.dateSettings;
+                if (data.sitesSettings) settings.sitesSettings = data.sitesSettings;
+                if (data.weatherSettings) settings.weatherSettings = data.weatherSettings;
+                if (data.muteBackground !== undefined) settings.muteBackground = data.muteBackground;
+                if (data.backgroundBlur !== undefined) settings.backgroundBlur = data.backgroundBlur;
+                if (data.hoverEffectsSettings) settings.hoverEffectsSettings = data.hoverEffectsSettings;
+
+                // Sync UI elements with settings
                 // Sync Background Settings
                 if (data.backgroundKey) {
                     backgroundSelect.value = "custom";
@@ -152,10 +220,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 } else {
                     backgroundBlurInput.value = defaultSettings.backgroundBlur;
                 }
-                if (data.favoriteSitesSettings) {
-                    applyFavoriteSitesSettings(data.favoriteSitesSettings);
+                if (data.sitesSettings) {
+                    applySitesSettings(data.sitesSettings);
                 } else {
-                    applyFavoriteSitesSettings(defaultSettings.favoriteSitesSettings);
+                    applySitesSettings(defaultSettings.sitesSettings);
                 }
                 // Sync Clock Settings
                 if (data.clockSettings) {
@@ -214,6 +282,54 @@ document.addEventListener("DOMContentLoaded", function () {
                     datePositionInput.value = defaultSettings.dateSettings.position;
                 }
 
+                // Sync Weather Settings
+                if (data.weatherSettings) {
+                    showWeatherInput.checked = data.weatherSettings.showWeather;
+                    weatherUnitInput.value = data.weatherSettings.unit;
+                    weatherFontTypeInput.value = data.weatherSettings.fontType;
+                    weatherFontColorInput.value = data.weatherSettings.color;
+                    weatherFontSizeInput.value = data.weatherSettings.size;
+                    weatherPositionInput.value = data.weatherSettings.position;
+                } else {
+                    showWeatherInput.checked = defaultSettings.weatherSettings.showWeather;
+                    weatherUnitInput.value = defaultSettings.weatherSettings.unit;
+                    weatherFontTypeInput.value = defaultSettings.weatherSettings.fontType;
+                    weatherFontColorInput.value = defaultSettings.weatherSettings.color;
+                    weatherFontSizeInput.value = defaultSettings.weatherSettings.size;
+                    weatherPositionInput.value = defaultSettings.weatherSettings.position;
+                }
+
+                // Sync Sites Settings
+                if (data.sitesSettings) {
+                    showSitesInput.checked = data.sitesSettings.showSites;
+                    sitesViewInput.value = data.sitesSettings.view;
+                    sitesPositionInput.value = data.sitesSettings.position;
+                    sitesStyleInput.value = data.sitesSettings.style;
+                    sitesShowIconsInput.checked = data.sitesSettings.showIcons;
+                    sitesShowTitlesInput.checked = data.sitesSettings.showTitles;
+                    bookmarksFolderInput.value = data.sitesSettings.bookmarksFolder;
+                    recentTimeRangeInput.value = data.sitesSettings.recentTimeRange;
+                    mostVisitedCountInput.value = data.sitesSettings.mostVisitedCount;
+                } else {
+                    showSitesInput.checked = defaultSettings.sitesSettings.showSites;
+                    sitesViewInput.value = defaultSettings.sitesSettings.view;
+                    sitesPositionInput.value = defaultSettings.sitesSettings.position;
+                    sitesStyleInput.value = defaultSettings.sitesSettings.style;
+                    sitesShowIconsInput.checked = defaultSettings.sitesSettings.showIcons;
+                    sitesShowTitlesInput.checked = defaultSettings.sitesSettings.showTitles;
+                    bookmarksFolderInput.value = defaultSettings.sitesSettings.bookmarksFolder;
+                    recentTimeRangeInput.value = defaultSettings.sitesSettings.recentTimeRange;
+                    mostVisitedCountInput.value = defaultSettings.sitesSettings.mostVisitedCount;
+                }
+
+                // Sync Hover Effects Settings
+                if (data.hoverEffectsSettings) {
+                    enableHoverEffectsInput.checked = data.hoverEffectsSettings.enabled;
+                    toggleHoverEffects(data.hoverEffectsSettings.enabled);
+                } else {
+                    enableHoverEffectsInput.checked = defaultSettings.hoverEffectsSettings.enabled;
+                    toggleHoverEffects(defaultSettings.hoverEffectsSettings.enabled);
+                }
             }
         );
     }
@@ -812,129 +928,766 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // ==================== Site Functions ====================
-    // Function to update widget position
-    function updateFavoriteSitesPosition(position) {
-        favoriteSitesElement.classList.remove("top-left", "top-right", "bottom-left", "bottom-right", "center", "free");
+    // ==================== Sites Functions ====================
+    // Function to update sites widget position
+    function updateSitesPosition(position) {
+        sitesElement.classList.remove("top-left", "top-right", "bottom-left", "bottom-right", "center", "free");
 
         if (position !== "free") {
-            favoriteSitesElement.style.left = '';
-            favoriteSitesElement.style.top = '';
-            favoriteSitesElement.style.position = '';
-            removeElementDraggable(favoriteSitesElement);
-            siteDragButton.style.display = 'none'; // Hide the drag button
+            sitesElement.style.left = '';
+            sitesElement.style.top = '';
+            sitesElement.style.position = '';
+            removeElementDraggable(sitesElement);
+            sitesDragButton.style.display = 'none';
         } else {
-            dateElement.classList.add("free");
-            siteDragButton.style.display = 'inline-block'; // Show the drag button
-        }
-
-        favoriteSitesElement.classList.add(position);
-
-        if (position === "free") {
-            // Retrieve the last saved position from chrome storage
-            chrome.storage.local.get(['favoriteSitesPosition'], function (data) {
-                if (data.favoriteSitesPosition) {
-                    favoriteSitesElement.style.left = data.favoriteSitesPosition.left;
-                    favoriteSitesElement.style.top = data.favoriteSitesPosition.top;
-                    favoriteSitesElement.style.position = 'absolute';
+            sitesElement.classList.add("free");
+            sitesDragButton.style.display = 'inline-block';
+            isSitesDraggingEnabled = true;
+            makeElementDraggable(sitesElement, 'sitesPosition', isSitesDraggingEnabled);
+            sitesElement.style.position = 'absolute';
+            
+            chrome.storage.local.get(['sitesPosition'], function(data) {
+                if (data.sitesPosition) {
+                    sitesElement.style.left = data.sitesPosition.left;
+                    sitesElement.style.top = data.sitesPosition.top;
                 }
             });
         }
+
+        sitesElement.classList.add(position);
     }
 
-    function saveSitePosition() {
+    // Function to save sites position
+    function saveSitesPosition() {
         const position = {
-            left: favoriteSitesElement.style.left,
-            top: favoriteSitesElement.style.top
+            left: sitesElement.style.left,
+            top: sitesElement.style.top
         };
-        chrome.storage.local.set({ favoriteSitesPosition: position }, function () {
-            console.log("Site position saved:", position);
-        });
+        chrome.storage.local.set({ sitesPosition: position });
     }
 
-    // Function to apply widget settings
-    function applyFavoriteSitesSettings(settings) {
-        showFavoriteSitesInput.checked = settings.showFavoriteSites !== undefined ? settings.showFavoriteSites : true;
-        favoriteSitesSourceInput.value = settings.source || "most-viewed";
-        favoriteSitesPositionInput.value = settings.position || "top-left";
-
-        // Show or hide widget
-        favoriteSitesElement.style.display = showFavoriteSitesInput.checked ? 'block' : 'none';
-
-        // Update widget position
-        updateFavoriteSitesPosition(favoriteSitesPositionInput.value);
-
-        // Load favorite sites based on source
-        loadFavoriteSites(settings.source);
-    }
-
-    // Function to load favorite sites
-    function loadFavoriteSites(source) {
-        favoriteSitesElement.innerHTML = ''; // Clear the widget content
-
-        if (source === "most-viewed") {
-            // Load most viewed sites (you can use Chrome's history API or a predefined list)
-            const mostViewedSites = [
-                { name: "Google", url: "https://www.google.com" },
-                { name: "YouTube", url: "https://www.youtube.com" },
-                { name: "GitHub", url: "https://www.github.com" }
-            ];
-            renderFavoriteSites(mostViewedSites);
-        } else if (source === "user-custom") {
-            // Load user-custom sites from storage
-            chrome.storage.local.get(['favoriteSitesSettings'], function (data) {
-                const customSites = data.favoriteSitesSettings?.customSites || [];
-                renderFavoriteSites(customSites);
-            });
+    // Function to load bookmarks
+    function getFaviconUrl(url) {
+        try {
+            const domain = new URL(url).hostname;
+            return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+        } catch (error) {
+            return 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjEwIj48L2NpcmNsZT48bGluZSB4MT0iMiIgeTE9IjEyIiB4Mj0iMjIiIHkyPSIxMiI+PC9saW5lPjxwYXRoIGQ9Ik0xMiAyYTE1LjMgMTUuMyAwIDAgMSA0IDE1IDE1LjMgMTUuMyAwIDAgMS00IDE1IDE1LjMgMTUuMyAwIDAgMS00LTE1IDE1LjMgMTUuMyAwIDAgMSA0LTE1eiI+PC9wYXRoPjwvc3ZnPg==';
         }
     }
 
-    // Function to render favorite sites
-    function renderFavoriteSites(sites) {
-        const ul = document.createElement('ul');
-        sites.forEach(site => {
-            const li = document.createElement('li');
-            const a = document.createElement('a');
-            a.href = site.url;
-            a.textContent = site.name;
-            a.target = "_blank"; // Open in new tab
-            li.appendChild(a);
-            ul.appendChild(li);
-        });
-        favoriteSitesElement.appendChild(ul);
+    // Update the bookmarks loading function
+    function loadBookmarks(folder = '') {
+        if (!chrome.bookmarks) {
+            console.warn('Bookmarks API not available. Please check permissions.');
+            renderSites([]);
+            return;
+        }
+
+        try {
+            chrome.bookmarks.getTree(function(bookmarkTreeNodes) {
+                if (chrome.runtime.lastError) {
+                    console.error('Error accessing bookmarks:', chrome.runtime.lastError);
+                    renderSites([]);
+                    return;
+                }
+
+                let targetFolder = bookmarkTreeNodes;
+                if (folder) {
+                    // Update navigation stack
+                    if (folder !== currentFolderId) {
+                        if (currentFolderId) {
+                            folderNavigationStack.push(currentFolderId);
+                        }
+                        currentFolderId = folder;
+                    }
+
+                    // Find the specified folder
+                    const findFolder = (nodes, folderId) => {
+                        for (const node of nodes) {
+                            if (node.id === folderId) return node;
+                            if (node.children) {
+                                const found = findFolder(node.children, folderId);
+                                if (found) return found;
+                            }
+                        }
+                        return null;
+                    };
+                    targetFolder = findFolder(bookmarkTreeNodes, folder);
+                    if (!targetFolder) {
+                        targetFolder = bookmarkTreeNodes;
+                    }
+                } else {
+                    // Reset navigation when going back to root
+                    folderNavigationStack = [];
+                    currentFolderId = '';
+                }
+
+                const items = [];
+                const processNode = (node, level = 0) => {
+                    if (!node) return;
+                    
+                    if (node.children) {
+                        // This is a folder
+                        const folderState = folderStates.get(node.id) || 'closed';
+                        items.push({
+                            id: node.id,
+                            title: node.title || 'Bookmarks',
+                            isFolder: true,
+                            level: level,
+                            state: folderState,
+                            icon: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMjIgMTlhMiAyIDAgMCAxLTIgMkg0YTIgMiAwIDAgMS0yLTJWNWEyIDIgMCAwIDEgMi0yaDVsMiAzaDlhMiAyIDAgMCAxIDIgMnoiPjwvcGF0aD48L3N2Zz4='
+                        });
+                        // Only process children if folder is open
+                        if (folderState === 'open') {
+                            node.children.forEach(child => processNode(child, level + 1));
+                        }
+                    } else if (node.url) {
+                        // This is a bookmark
+                        items.push({
+                            id: node.id,
+                            title: node.title,
+                            url: node.url,
+                            isFolder: false,
+                            level: level,
+                            icon: getFaviconUrl(node.url)
+                        });
+                    }
+                };
+
+                if (Array.isArray(targetFolder)) {
+                    targetFolder.forEach(node => processNode(node));
+                } else {
+                    processNode(targetFolder);
+                }
+
+                renderSites(items);
+            });
+        } catch (error) {
+            console.error('Error loading bookmarks:', error);
+            renderSites([]);
+        }
     }
 
-    // Save widget settings on change
-    [showFavoriteSitesInput, favoriteSitesSourceInput, favoriteSitesPositionInput].forEach(input => {
-        input.addEventListener("change", function () {
-            const favoriteSitesSettings = {
-                showFavoriteSites: showFavoriteSitesInput.checked,
-                source: favoriteSitesSourceInput.value,
-                position: favoriteSitesPositionInput.value,
-                customSites: [] // You can add logic to manage custom sites
-            };
-            chrome.storage.local.set({ favoriteSitesSettings: favoriteSitesSettings }, function () {
-                console.log("Favorite Sites settings saved.");
+    // Update the renderSites function to handle folder states
+    function renderSites(sites) {
+        sitesElement.innerHTML = '';
+        sitesElement.className = `sites ${sitesStyleInput.value}-view`;
+
+        // Add back button if we're in a subfolder
+        if (folderNavigationStack.length > 0) {
+            const backButton = document.createElement('div');
+            backButton.className = 'site-item back-button';
+            backButton.innerHTML = `
+                <div class="site-icon" style="background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTkgMTJINU0xMiAxOWwtNy03IDctNyIvPjwvc3ZnPg==')"></div>
+                <div class="site-title">Back</div>
+            `;
+            backButton.addEventListener('click', () => {
+                const previousFolder = folderNavigationStack.pop();
+                currentFolderId = previousFolder || '';
+                loadBookmarks(currentFolderId);
             });
-            applyFavoriteSitesSettings(favoriteSitesSettings);
+            sitesElement.appendChild(backButton);
+        }
+
+        sites.forEach(site => {
+            const siteItem = document.createElement(site.isFolder ? 'div' : 'a');
+            siteItem.className = 'site-item' + (site.isFolder ? ' folder' : '');
+            if (!site.isFolder) {
+                siteItem.href = site.url;
+                siteItem.target = '_blank';
+                siteItem.rel = 'noopener noreferrer';
+            }
+
+            // Add indentation based on level
+            siteItem.style.paddingLeft = `${site.level * 20}px`;
+
+            if (sitesShowIconsInput.checked) {
+                const iconContainer = document.createElement('div');
+                iconContainer.className = 'site-icon';
+                iconContainer.style.backgroundImage = `url(${site.icon})`;
+                iconContainer.style.backgroundColor = '#f0f0f0';
+                siteItem.appendChild(iconContainer);
+            }
+
+            if (sitesShowTitlesInput.checked) {
+                const title = document.createElement('div');
+                title.className = 'site-title';
+                title.textContent = site.title || new URL(site.url).hostname;
+                siteItem.appendChild(title);
+            }
+
+            if (site.isFolder) {
+                // Set folder state
+                siteItem.setAttribute('data-state', site.state || 'closed');
+                
+                siteItem.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const newState = toggleFolder(site.id);
+                    siteItem.setAttribute('data-state', newState);
+                    loadBookmarks(site.id);
+                });
+            }
+
+            sitesElement.appendChild(siteItem);
+        });
+    }
+
+    // Function to handle custom sites
+    function addCustomSite() {
+        const siteItem = document.createElement('div');
+        siteItem.className = 'custom-site-item';
+        
+        const titleInput = document.createElement('input');
+        titleInput.type = 'text';
+        titleInput.placeholder = 'Site Title';
+        titleInput.className = 'custom-site-title';
+        
+        const urlInput = document.createElement('input');
+        urlInput.type = 'text';
+        urlInput.placeholder = 'Site URL';
+        urlInput.className = 'custom-site-url';
+        urlInput.addEventListener('input', function() {
+            if (!urlInput.value.startsWith('http://') && !urlInput.value.startsWith('https://')) {
+                urlInput.value = 'https://' + urlInput.value;
+            }
+        });
+        
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = '×';
+        deleteButton.className = 'custom-site-delete';
+        deleteButton.onclick = () => {
+            siteItem.remove();
+            saveCustomSites();
+        };
+        
+        siteItem.appendChild(titleInput);
+        siteItem.appendChild(urlInput);
+        siteItem.appendChild(deleteButton);
+        
+        customSitesList.appendChild(siteItem);
+        
+        // Add input event listeners to save changes
+        titleInput.addEventListener('input', saveCustomSites);
+        urlInput.addEventListener('input', saveCustomSites);
+    }
+
+    // Function to save custom sites
+    function saveCustomSites() {
+        const customSites = Array.from(customSitesList.children).map(item => {
+            const titleInput = item.querySelector('.custom-site-title');
+            const urlInput = item.querySelector('.custom-site-url');
+            return {
+                title: titleInput.value.trim(),
+                url: urlInput.value.trim()
+            };
+        }).filter(site => site.title && site.url);
+        
+        chrome.storage.local.set({ customSites: customSites }, function() {
+            console.log('Custom sites saved:', customSites);
+            if (sitesViewInput.value === 'custom') {
+                loadCustomSites();
+            }
+        });
+    }
+
+    // Function to load custom sites
+    function loadCustomSites() {
+        chrome.storage.local.get(['customSites'], function(data) {
+            if (data.customSites && Array.isArray(data.customSites)) {
+                const sites = data.customSites.map(site => ({
+                    title: site.title,
+                    url: site.url,
+                    icon: getFaviconUrl(site.url),
+                    isFolder: false
+                }));
+                renderSites(sites);
+            } else {
+                renderSites([]);
+            }
+        });
+    }
+
+    // Event Listeners
+    sitesViewInput.addEventListener('change', function() {
+        const view = this.value;
+        document.querySelectorAll('.view-options').forEach(el => {
+            if (el) {
+                el.classList.remove('active');
+            }
+        });
+        const viewOptions = document.getElementById(`${view}Options`);
+        if (viewOptions) {
+            viewOptions.classList.add('active');
+        }
+        
+        try {
+            switch(view) {
+                case 'bookmarks':
+                    loadBookmarks(bookmarksFolderInput.value);
+                    break;
+                case 'recent':
+                    loadRecentSites(recentTimeRangeInput.value);
+                    break;
+                case 'most-visited':
+                    loadMostVisitedSites(parseInt(mostVisitedCountInput.value));
+                    break;
+                case 'custom':
+                    loadCustomSites();
+                    break;
+            }
+        } catch (error) {
+            console.error('Error switching view:', error);
+            renderSites([]); // Fallback to empty state
+        }
+    });
+
+    bookmarksFolderInput.addEventListener('change', function() {
+        loadBookmarks(this.value);
+    });
+
+    recentTimeRangeInput.addEventListener('change', function() {
+        loadRecentSites(this.value);
+    });
+
+    mostVisitedCountInput.addEventListener('change', function() {
+        loadMostVisitedSites(this.value);
+    });
+
+    sitesStyleInput.addEventListener('change', function() {
+        sitesElement.className = `sites ${this.value}-view`;
+    });
+
+    sitesShowIconsInput.addEventListener('change', function() {
+        const sites = Array.from(sitesElement.children);
+        sites.forEach(site => {
+            const icon = site.querySelector('.site-icon');
+            if (icon) {
+                icon.style.display = this.checked ? 'block' : 'none';
+            }
         });
     });
 
-    function toggleFavoriteSitesSettings(enable) {
-        const favoriteSitesSettingsInputs = [
-            favoriteSitesSourceInput,
-            favoriteSitesPositionInput,
-            siteDragButton
-        ];
-
-        favoriteSitesSettingsInputs.forEach(input => {
-            input.disabled = !enable;
-            if (input.type === 'color' || input.type === 'range') {
-                input.style.opacity = enable ? 1 : 0.5; // Adjust opacity for visual feedback
-            } else {
-                input.style.opacity = enable ? 1 : 0.5;
+    sitesShowTitlesInput.addEventListener('change', function() {
+        const sites = Array.from(sitesElement.children);
+        sites.forEach(site => {
+            const title = site.querySelector('.site-title');
+            if (title) {
+                title.style.display = this.checked ? 'block' : 'none';
             }
         });
+    });
+
+    addCustomSiteButton.addEventListener('click', addCustomSite);
+
+    sitesDragButton.addEventListener('click', function() {
+        if (isSitesDraggingEnabled) {
+            sitesDragButton.textContent = 'Drag';
+            isSitesDraggingEnabled = false;
+            removeElementDraggable(sitesElement); // Disable dragging
+            saveSitesPosition();
+        } else {
+            sitesDragButton.textContent = 'Save';
+            isSitesDraggingEnabled = true;
+            makeElementDraggable(sitesElement, 'sitesPosition', isSitesDraggingEnabled); // Enable dragging
+        }
+    });
+
+    // Function to apply sites settings
+    function applySitesSettings(settings) {
+        if (!sitesElement) {
+            console.error('Sites element not found');
+            return;
+        }
+
+        try {
+            // Update visibility
+            sitesElement.style.display = settings.showSites ? 'block' : 'none';
+            
+            // Update view
+            if (sitesViewInput) {
+                sitesViewInput.value = settings.view;
+                document.querySelectorAll('.view-options').forEach(el => el.classList.remove('active'));
+                const viewOptionsElement = document.getElementById(`${settings.view}Options`);
+                if (viewOptionsElement) {
+                    viewOptionsElement.classList.add('active');
+                }
+            }
+
+            // Update position
+            if (sitesPositionInput) {
+                sitesPositionInput.value = settings.position;
+                updateSitesPosition(settings.position);
+            }
+
+            // Update style
+            if (sitesStyleInput) {
+                sitesStyleInput.value = settings.style;
+                sitesElement.className = `sites ${settings.style}-view`;
+            }
+
+            // Update display options
+            if (sitesShowIconsInput) {
+                sitesShowIconsInput.checked = settings.showIcons;
+            }
+            if (sitesShowTitlesInput) {
+                sitesShowTitlesInput.checked = settings.showTitles;
+            }
+
+            // Update view-specific settings
+            if (bookmarksFolderInput) {
+                bookmarksFolderInput.value = settings.bookmarksFolder;
+            }
+            if (recentTimeRangeInput) {
+                recentTimeRangeInput.value = settings.recentTimeRange;
+            }
+            if (mostVisitedCountInput) {
+                mostVisitedCountInput.value = settings.mostVisitedCount;
+            }
+
+            // Load initial sites based on view
+            switch(settings.view) {
+                case 'bookmarks':
+                    loadBookmarks(settings.bookmarksFolder);
+                    break;
+                case 'recent':
+                    loadRecentSites(settings.recentTimeRange);
+                    break;
+                case 'most-visited':
+                    loadMostVisitedSites(settings.mostVisitedCount);
+                    break;
+                case 'custom':
+                    renderSites(settings.customSites || []);
+                    break;
+            }
+        } catch (error) {
+            console.error('Error applying sites settings:', error);
+        }
+    }
+
+    // Initialize sites widget
+    function initializeSitesWidget() {
+        // Wait for DOM to be fully loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeSitesWidget);
+            return;
+        }
+
+        // Get all required elements
+        const elements = {
+            sitesElement: document.getElementById('sites'),
+            showSitesInput: document.getElementById('showSites'),
+            sitesViewInput: document.getElementById('sitesView'),
+            sitesPositionInput: document.getElementById('sitesPosition'),
+            sitesStyleInput: document.getElementById('sitesStyle'),
+            sitesShowIconsInput: document.getElementById('sitesShowIcons'),
+            sitesShowTitlesInput: document.getElementById('sitesShowTitles'),
+            bookmarksFolderInput: document.getElementById('bookmarksFolder'),
+            recentTimeRangeInput: document.getElementById('recentTimeRange'),
+            mostVisitedCountInput: document.getElementById('mostVisitedCount')
+        };
+
+        // Add resize observer to save size
+        const resizeObserver = new ResizeObserver(entries => {
+            for (const entry of entries) {
+                const { width, height } = entry.contentRect;
+                chrome.storage.local.set({
+                    sitesSize: { width: `${width}px`, height: `${height}px` }
+                }, () => {
+                    console.log('Sites widget size saved:', { width, height });
+                });
+            }
+        });
+
+        // Start observing the sites element
+        if (elements.sitesElement) {
+            resizeObserver.observe(elements.sitesElement);
+
+            // Restore saved size
+            chrome.storage.local.get(['sitesSize'], (data) => {
+                if (data.sitesSize) {
+                    elements.sitesElement.style.width = data.sitesSize.width;
+                    elements.sitesElement.style.height = data.sitesSize.height;
+                }
+            });
+        }
+
+        // Rest of the initialization code...
+
+        // Check if any elements are missing
+        const missingElements = Object.entries(elements)
+            .filter(([_, element]) => !element)
+            .map(([name]) => name);
+
+        if (missingElements.length > 0) {
+            console.error('Missing required elements for sites widget:', missingElements);
+            return;
+        }
+
+        const settings = defaultSettings.sitesSettings;
+        
+        // Safely set input values
+        try {
+            elements.showSitesInput.checked = settings.showSites;
+            elements.sitesViewInput.value = settings.view;
+            elements.sitesPositionInput.value = settings.position;
+            elements.sitesStyleInput.value = settings.style;
+            elements.sitesShowIconsInput.checked = settings.showIcons;
+            elements.sitesShowTitlesInput.checked = settings.showTitles;
+            elements.bookmarksFolderInput.value = settings.bookmarksFolder;
+            elements.recentTimeRangeInput.value = settings.recentTimeRange;
+            elements.mostVisitedCountInput.value = settings.mostVisitedCount;
+
+            // Update display and position
+            elements.sitesElement.style.display = settings.showSites ? 'block' : 'none';
+            updateSitesPosition(settings.position);
+
+            // Add active class to view options
+            const viewOptionsElement = document.getElementById(`${settings.view}Options`);
+            if (viewOptionsElement) {
+                viewOptionsElement.classList.add('active');
+            }
+
+            // Load initial sites
+            switch(settings.view) {
+                case 'bookmarks':
+                    loadBookmarks(settings.bookmarksFolder);
+                    break;
+                case 'recent':
+                    loadRecentSites(settings.recentTimeRange);
+                    break;
+                case 'most-visited':
+                    loadMostVisitedSites(settings.mostVisitedCount);
+                    break;
+                case 'custom':
+                    renderSites(settings.customSites || []);
+                    break;
+            }
+        } catch (error) {
+            console.error('Error initializing sites widget:', error);
+        }
+    }
+
+    // Call initialize function
+    initializeSitesWidget();
+
+    // ==================== Weather Functions ====================
+    // Weather cache
+    let weatherCache = {
+        data: null,
+        timestamp: 0,
+        position: null
+    };
+
+    // Weather update interval (15 minutes)
+    const WEATHER_CACHE_DURATION = 15 * 60 * 1000;
+
+    async function updateWeather() {
+        if (!settings.weatherSettings.showWeather) {
+            weatherElement.style.display = 'none';
+            return;
+        }
+
+        try {
+            // Check if we have cached weather data that's still valid
+            const now = Date.now();
+            if (weatherCache.data && 
+                (now - weatherCache.timestamp) < WEATHER_CACHE_DURATION && 
+                weatherCache.unit === weatherUnitInput.value) {
+                
+                updateWeatherDisplay(weatherCache.data);
+                return;
+            }
+
+            // Show loading state
+            weatherElement.style.display = 'block';
+            weatherElement.innerHTML = '<div class="weather-loading">Loading weather...</div>';
+
+            // Get position with timeout
+            const position = await Promise.race([
+                new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject);
+                }),
+                new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Geolocation timeout')), 5000)
+                )
+            ]);
+
+            const { latitude, longitude } = position.coords;
+            const unit = weatherUnitInput.value;
+            const apiKey = 'b9b89f1577273d6144db2bfbe33ec132';
+
+            const response = await fetch(
+                `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=${unit}&appid=${apiKey}`
+            );
+            
+            if (!response.ok) {
+                throw new Error('Weather API request failed');
+            }
+
+            const data = await response.json();
+
+            // Update cache
+            weatherCache = {
+                data: data,
+                timestamp: now,
+                unit: unit
+            };
+
+            updateWeatherDisplay(data);
+
+        } catch (error) {
+            console.error('Error fetching weather:', error);
+            weatherElement.innerHTML = '<div class="weather-error">Unable to load weather</div>';
+            weatherElement.style.display = 'block';
+        }
+    }
+
+    function updateWeatherDisplay(data) {
+        const temperature = Math.round(data.main.temp);
+        const description = data.weather[0].description;
+        const icon = data.weather[0].icon;
+        const location = data.name;
+
+        weatherElement.innerHTML = `
+            <div class="weather-icon" style="background-image: url(https://openweathermap.org/img/wn/${icon}@2x.png)"></div>
+            <div class="temperature">${temperature}°${weatherUnitInput.value === 'metric' ? 'C' : 'F'}</div>
+            <div class="description">${description}</div>
+            <div class="location">${location}</div>
+        `;
+
+        // Apply current settings
+        applyWeatherSettings(settings.weatherSettings);
+    }
+
+    // Add loading and error styles
+    const style = document.createElement('style');
+    style.textContent = `
+        .weather-loading {
+            padding: 10px;
+            text-align: center;
+            font-style: italic;
+        }
+        .weather-error {
+            padding: 10px;
+            text-align: center;
+            color: #ff6b6b;
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Initialize weather with immediate update and then set interval
+    updateWeather();
+    setInterval(updateWeather, WEATHER_CACHE_DURATION);
+
+    function applyWeatherSettings(settings) {
+        if (!weatherElement) return;
+
+        weatherElement.style.display = settings.showWeather ? 'block' : 'none';
+        weatherElement.style.fontFamily = settings.fontType;
+        weatherElement.style.color = settings.color;
+
+        // Apply specific font sizes to each element
+        const temperature = weatherElement.querySelector('.temperature');
+        const description = weatherElement.querySelector('.description');
+        const location = weatherElement.querySelector('.location');
+
+        if (temperature) {
+            temperature.style.fontSize = `${settings.size}px`;
+        }
+        if (description) {
+            description.style.fontSize = `${Math.round(settings.size * 0.6)}px`; // Smaller font for description
+        }
+        if (location) {
+            location.style.fontSize = `${Math.round(settings.size * 0.7)}px`; // Slightly larger than description
+        }
+
+        updateWeatherPosition(settings.position);
+
+        // Update input values
+        showWeatherInput.checked = settings.showWeather;
+        weatherUnitInput.value = settings.unit;
+        weatherFontTypeInput.value = settings.fontType;
+        weatherFontColorInput.value = settings.color;
+        weatherFontSizeInput.value = settings.size;
+        weatherPositionInput.value = settings.position;
+    }
+
+    function updateWeatherFontSizeLabel() {
+        const fontSizeSlider = document.getElementById('weatherFontSize');
+        const weatherFontSizeLabel = document.getElementById('weatherFontSizeLabel');
+        weatherFontSizeLabel.textContent = fontSizeSlider.value;
+    }
+
+    weatherFontSizeInput.addEventListener('input', function() {
+        const size = parseInt(this.value);
+        settings.weatherSettings.size = size;
+        saveWeatherSettings();
+        applyWeatherSettings(settings.weatherSettings);
+        updateWeatherFontSizeLabel(); // Update the label
+    });
+
+    // Weather Event Listeners
+    showWeatherInput.addEventListener('change', function() {
+        settings.weatherSettings.showWeather = this.checked;
+        saveWeatherSettings();
+        updateWeather();
+    });
+
+    weatherUnitInput.addEventListener('change', function() {
+        settings.weatherSettings.unit = this.value;
+        saveWeatherSettings();
+        updateWeather();
+    });
+
+    weatherFontTypeInput.addEventListener('change', function() {
+        settings.weatherSettings.fontType = this.value;
+        saveWeatherSettings();
+        applyWeatherSettings(settings.weatherSettings);
+    });
+
+    weatherFontColorInput.addEventListener('input', function() {
+        settings.weatherSettings.color = this.value;
+        saveWeatherSettings();
+        applyWeatherSettings(settings.weatherSettings);
+    });
+
+    weatherPositionInput.addEventListener('change', function() {
+        settings.weatherSettings.position = this.value;
+        saveWeatherSettings();
+        updateWeatherPosition(this.value);
+    });
+
+    function saveWeatherSettings() {
+        chrome.storage.local.set({ weatherSettings: settings.weatherSettings }, function() {
+            console.log('Weather settings saved:', settings.weatherSettings);
+        });
+    }
+
+    function updateWeatherPosition(position) {
+        weatherElement.classList.remove('top-left', 'top-right', 'bottom-left', 'bottom-right', 'center', 'free');
+        
+        if (position !== 'free') {
+            weatherElement.style.left = '';
+            weatherElement.style.top = '';
+            weatherElement.style.position = '';
+            removeElementDraggable(weatherElement);
+            weatherDragButton.style.display = 'none';
+            } else {
+            weatherElement.classList.add('free');
+            weatherDragButton.style.display = 'inline-block';
+            makeElementDraggable(weatherElement, 'weatherPosition', isWeatherDraggingEnabled);
+            
+            chrome.storage.local.get(['weatherPosition'], function(data) {
+                if (data.weatherPosition) {
+                    weatherElement.style.left = data.weatherPosition.left;
+                    weatherElement.style.top = data.weatherPosition.top;
+                    weatherElement.style.position = 'absolute';
+                }
+            });
+        }
+        
+        weatherElement.classList.add(position);
     }
 
     // ==================== Initialization ====================
@@ -943,11 +1696,11 @@ document.addEventListener("DOMContentLoaded", function () {
     syncSettingsMenu();
     applyRandomAnimation();
     updateHint();
-    applyFavoriteSitesSettings(defaultSettings.favoriteSitesSettings);
+    applySitesSettings(defaultSettings.sitesSettings);
 
     // Load saved settings and apply them
     chrome.storage.local.get(
-        ["backgroundKey", "clockSettings", "daySettings", "dateSettings", "muteBackground", "backgroundBlur"],
+        ["backgroundKey", "clockSettings", "daySettings", "dateSettings", "muteBackground", "backgroundBlur", "sitesSettings", "weatherSettings", "hoverEffectsSettings"],
         function (data) {
             // Apply background
             if (data.backgroundKey) {
@@ -994,6 +1747,29 @@ document.addEventListener("DOMContentLoaded", function () {
                 toggleBackgroundSound(data.muteBackground);
             } else {
                 toggleBackgroundSound(defaultSettings.muteBackground); // Use default mute setting
+            }
+
+            // Apply weather settings
+            if (data.weatherSettings) {
+                applyWeatherSettings(data.weatherSettings);
+            } else {
+                applyWeatherSettings(defaultSettings.weatherSettings); // Use default weather settings
+            }
+
+            // Apply sites settings
+            if (data.sitesSettings) {
+                applySitesSettings(data.sitesSettings);
+            } else {
+                applySitesSettings(defaultSettings.sitesSettings); // Use default sites settings
+            }
+
+            // Apply hover effects settings
+            if (data.hoverEffectsSettings) {
+                enableHoverEffectsInput.checked = data.hoverEffectsSettings.enabled;
+                toggleHoverEffects(data.hoverEffectsSettings.enabled);
+            } else {
+                enableHoverEffectsInput.checked = defaultSettings.hoverEffectsSettings.enabled;
+                toggleHoverEffects(defaultSettings.hoverEffectsSettings.enabled);
             }
         }
     );
@@ -1062,18 +1838,18 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
     // site Drag Button
-    siteDragButton.addEventListener('click', function () {
-        if (isSiteDraggingEnabled) {
+    sitesDragButton.addEventListener('click', function () {
+        if (isSitesDraggingEnabled) {
             // Save the position and disable dragging
-            siteDragButton.textContent = 'Drag';
-            isSiteDraggingEnabled = false;
-            removeElementDraggable(favoriteSitesElement); // Disable dragging
-            saveSitePosition(); // Save the current position
+            sitesDragButton.textContent = 'Drag';
+            isSitesDraggingEnabled = false;
+            removeElementDraggable(sitesElement); // Disable dragging
+            saveSitesPosition(); // Save the current position
         } else {
             // Enable dragging
-            siteDragButton.textContent = 'Save';
-            isSiteDraggingEnabled = true;
-            makeElementDraggable(favoriteSitesElement, 'favoriteSitesPosition', isSiteDraggingEnabled); // Enable dragging
+            sitesDragButton.textContent = 'Save';
+            isSitesDraggingEnabled = true;
+            makeElementDraggable(sitesElement, 'sitesPosition', isSitesDraggingEnabled); // Enable dragging
         }
     });
     showClockInput.addEventListener("change", function () {
@@ -1140,23 +1916,41 @@ document.addEventListener("DOMContentLoaded", function () {
             console.log("Date settings updated.");
         });
     });
-    showFavoriteSitesInput.addEventListener("change", function () {
-        const isFavoriteSitesVisible = showFavoriteSitesInput.checked;
-        favoriteSitesElement.style.display = isFavoriteSitesVisible ? 'block' : 'none';
+    showSitesInput.addEventListener("change", function () {
+        const isSitesVisible = showSitesInput.checked;
+        sitesElement.style.display = isSitesVisible ? 'block' : 'none';
 
-        // Enable or disable favorite sites settings based on visibility
-        toggleFavoriteSitesSettings(isFavoriteSitesVisible);
+        // Enable or disable sites settings based on visibility
+        toggleSitesSettings(isSitesVisible);
 
-        // Save the favorite sites visibility in chrome storage
-        const favoriteSitesSettings = {
-            showFavoriteSites: isFavoriteSitesVisible,
-            source: favoriteSitesSourceInput.value,
-            position: favoriteSitesPositionInput.value
+        // Save the sites visibility in chrome storage
+        const sitesSettings = {
+            showSites: isSitesVisible,
+            view: sitesViewInput.value,
+            position: sitesPositionInput.value,
+            style: sitesStyleInput.value,
+            showIcons: sitesShowIconsInput.checked,
+            showTitles: sitesShowTitlesInput.checked,
+            bookmarksFolder: bookmarksFolderInput.value,
+            recentTimeRange: recentTimeRangeInput.value,
+            mostVisitedCount: mostVisitedCountInput.value
         };
-        chrome.storage.local.set({ favoriteSitesSettings: favoriteSitesSettings }, function () {
-            console.log("Favorite Sites settings updated.");
+        chrome.storage.local.set({ sitesSettings: sitesSettings }, function () {
+            console.log("Sites settings updated.");
         });
     });
+    muteCheckbox.addEventListener('change', updateHint);
+    document.getElementById('muteBackground').addEventListener('change', function () {
+        const isMuted = this.checked;
+        toggleBackgroundSound(isMuted);
+
+        // Save mute setting in Chrome storage
+        chrome.storage.local.set({ muteBackground: isMuted }, function () {
+            console.log("Mute background sound setting saved:", isMuted);
+        });
+    });
+
+
     // Handle background selection
     backgroundInput.addEventListener("change", function (event) {
         const file = event.target.files[0];
@@ -1273,29 +2067,34 @@ document.addEventListener("DOMContentLoaded", function () {
         clockToggle.classList.toggle("rotated"); // Add or remove 'rotated' class to rotate arrow
     });
 
-    favoriteSitesHeader.addEventListener("click", () => {
-        favoriteSitesSettings.style.display = favoriteSitesSettings.style.display === "block" ? "none" : "block";
-        favoriteSitesToggle.classList.toggle("rotated"); // Add or remove 'rotated' class to rotate arrow
+    sitesHeader.addEventListener("click", () => {
+        sitesSettings.style.display = sitesSettings.style.display === "block" ? "none" : "block";
+        sitesToggle.classList.toggle("rotated"); // Add or remove 'rotated' class to rotate arrow
+    });
+
+    weatherHeader.addEventListener("click", () => {
+        weatherSettings.style.display = weatherSettings.style.display === "block" ? "none" : "block";
+        weatherToggle.classList.toggle("rotated"); // Add or remove 'rotated' class to rotate arrow
     });
 
     // Toggle widget visibility
-    showFavoriteSitesInput.addEventListener("change", function () {
-        favoriteSitesElement.style.display = showFavoriteSitesInput.checked ? 'block' : 'none';
+    showSitesInput.addEventListener("change", function () {
+        sitesElement.style.display = showSitesInput.checked ? 'block' : 'none';
     });
 
     // Update widget position
-    favoriteSitesPositionInput.addEventListener("change", function () {
-        updateFavoriteSitesPosition(favoriteSitesPositionInput.value);
+    sitesPositionInput.addEventListener("change", function () {
+        updateSitesPosition(sitesPositionInput.value);
     });
 
     // Update widget source
-    favoriteSitesSourceInput.addEventListener("change", function () {
-        loadFavoriteSites(favoriteSitesSourceInput.value);
+    sitesViewInput.addEventListener("change", function () {
+        loadBookmarks(bookmarksFolderInput.value);
     });
 
     // ==================== Initial State ====================
     // Show or hide clock, date, and day settings based on saved state
-    chrome.storage.local.get(["clockSettings", "dateSettings", "daySettings", "favoriteSitesSettings"], function (data) {
+    chrome.storage.local.get(["clockSettings", "dateSettings", "daySettings", "sitesSettings", "weatherSettings", "hoverEffectsSettings"], function (data) {
         if (data.clockSettings && !data.clockSettings.showClock) {
             clockSettingsGroup.style.display = 'none';
             clockElement.style.display = 'none';
@@ -1323,11 +2122,22 @@ document.addEventListener("DOMContentLoaded", function () {
             dateElement.style.display = isDateVisible ? 'block' : 'none';
             toggleDateSettings(isDateVisible); // Enable/disable settings based on visibility
         }
-        if (data.favoriteSitesSettings) {
-            const isFavoriteSitesVisible = data.favoriteSitesSettings.showFavoriteSites;
-            showFavoriteSitesInput.checked = isFavoriteSitesVisible;
-            favoriteSitesElement.style.display = isFavoriteSitesVisible ? 'block' : 'none';
-            toggleFavoriteSitesSettings(isFavoriteSitesVisible); // Enable/disable settings based on visibility
+        if (data.sitesSettings) {
+            const isSitesVisible = data.sitesSettings.showSites;
+            showSitesInput.checked = isSitesVisible;
+            sitesElement.style.display = isSitesVisible ? 'block' : 'none';
+            toggleSitesSettings(isSitesVisible); // Enable/disable settings based on visibility
+        }
+        if (data.weatherSettings && !data.weatherSettings.showWeather) {
+            weatherElement.style.display = 'none';
+            showWeatherInput.checked = false;
+            showWeatherInput.checked = data.weatherSettings.showWeather;
+            weatherElement.style.display = data.weatherSettings.showWeather ? 'block' : 'none';
+            toggleWeatherSettings(data.weatherSettings.showWeather);
+        }
+        if (data.hoverEffectsSettings) {
+            enableHoverEffectsInput.checked = data.hoverEffectsSettings.enabled;
+            toggleHoverEffects(data.hoverEffectsSettings.enabled);
         }
     });
     // ==================== Clock Event Listeners ====================
@@ -1470,6 +2280,130 @@ document.addEventListener("DOMContentLoaded", function () {
         });
         location.reload(); // Reload to apply defaults
     });
+
+    // Save settings function
+    function saveSettings() {
+        chrome.storage.local.set({
+            clockSettings: settings.clockSettings,
+            daySettings: settings.daySettings,
+            dateSettings: settings.dateSettings,
+            sitesSettings: settings.sitesSettings,
+            weatherSettings: settings.weatherSettings,
+            hoverEffectsSettings: settings.hoverEffectsSettings,
+            muteBackground: settings.muteBackground,
+            backgroundBlur: settings.backgroundBlur
+        }, function() {
+            console.log('Settings saved');
+        });
+    }
+
+    // Hover Effects Functions
+    function toggleHoverEffects(enable) {
+        const draggableElements = document.querySelectorAll('.draggable');
+        draggableElements.forEach(element => {
+            if (enable) {
+                element.classList.add('with-hover');
+            } else {
+                element.classList.remove('with-hover');
+            }
+        });
+    }
+
+    function toggleHoverEffectsSettings(enable) {
+        hoverEffectsSettings.style.display = enable ? 'block' : 'none';
+        hoverEffectsToggle.textContent = enable ? '▼' : '▶';
+    }
+
+    // Event Listeners for Hover Effects
+    hoverEffectsHeader.addEventListener("click", () => {
+        hoverEffectsSettings.style.display = hoverEffectsSettings.style.display === "block" ? "none" : "block";
+        hoverEffectsToggle.classList.toggle("rotated");
+    });
+
+    enableHoverEffectsInput.addEventListener("change", function() {
+        settings.hoverEffectsSettings.enabled = this.checked;
+        toggleHoverEffects(this.checked);
+        saveSettings();
+    });
+
+    // Initialize hover effects
+    toggleHoverEffects(settings.hoverEffectsSettings.enabled);
+
+    // Function to load recent sites
+    function loadRecentSites(timeRange) {
+        const millisecondsPerDay = 24 * 60 * 60 * 1000;
+        let startTime;
+        
+        switch(timeRange) {
+            case 'today':
+                startTime = Date.now() - millisecondsPerDay;
+                break;
+            case 'week':
+                startTime = Date.now() - (7 * millisecondsPerDay);
+                break;
+            case 'month':
+                startTime = Date.now() - (30 * millisecondsPerDay);
+                break;
+            default:
+                startTime = Date.now() - millisecondsPerDay;
+        }
+
+        chrome.history.search({
+            text: '',
+            startTime: startTime,
+            maxResults: 20
+        }, function(historyItems) {
+            const sites = historyItems.map(item => ({
+                title: item.title,
+                url: item.url,
+                icon: getFaviconUrl(item.url),
+                isFolder: false
+            }));
+            renderSites(sites);
+        });
+    }
+
+    // Function to load most visited sites
+    function loadMostVisitedSites(count) {
+        chrome.topSites.get(function(sites) {
+            const mostVisited = sites.slice(0, parseInt(count)).map(site => ({
+                title: site.title,
+                url: site.url,
+                icon: getFaviconUrl(site.url),
+                isFolder: false
+            }));
+            renderSites(mostVisited);
+        });
+    }
+
+    // Function to toggle sites settings
+    function toggleSitesSettings(enable) {
+        const sitesSettingsInputs = [
+            sitesViewInput,
+            sitesPositionInput,
+            sitesStyleInput,
+            sitesShowIconsInput,
+            sitesShowTitlesInput,
+            bookmarksFolderInput,
+            recentTimeRangeInput,
+            mostVisitedCountInput,
+            sitesDragButton,
+            addCustomSiteButton
+        ];
+
+        sitesSettingsInputs.forEach(input => {
+            if (input) {
+                input.disabled = !enable;
+                input.style.opacity = enable ? 1 : 0.5;
+            }
+        });
+
+        // Also toggle the custom sites list container
+        if (customSitesList) {
+            customSitesList.style.opacity = enable ? 1 : 0.5;
+            customSitesList.style.pointerEvents = enable ? 'auto' : 'none';
+        }
+    }
 
 });
 
